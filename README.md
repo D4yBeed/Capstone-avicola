@@ -1,6 +1,6 @@
 # 🐣 AvicolApp
 
-**AvicolApp** es una aplicación móvil diseñada para apoyar a los productores avícolas en el registro diario de la calidad de los huevos. Su objetivo es facilitar la trazabilidad, organización y análisis de los distintos tipos de huevos recolectados en nidos y pisos.
+**AvicolApp** es una aplicación móvil diseñada para apoyar a los productores avícolas de granjas reproductoras de la empresa Ariztia en el registro diario de la calidad de los huevos. Su objetivo es facilitar la trazabilidad, organización y análisis de los distintos tipos de huevos recolectados en nidos y pisos.
 
 ## 📋 Funcionalidades principales
 
