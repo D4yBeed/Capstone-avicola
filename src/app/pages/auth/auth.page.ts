@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user.model';
 import { Firebase } from 'src/app/services/firebase';
+import { Utils } from 'src/app/services/utils';
 
 @Component({
   selector: 'app-auth',
@@ -17,16 +18,79 @@ export class AuthPage implements OnInit {
   })
 
   firebaseSvc = inject(Firebase);
+  utilsSvc = inject(Utils);
 
   ngOnInit() {
   }
 
-  submit(){
+  async submit() {
     if (this.form.valid) {
-      this.firebaseSvc.signIn(this.form.value as User).then(res =>{
 
-        console.log(res);
+      const loading = await this.utilsSvc.loading();
+      await loading.present();
 
+      this.firebaseSvc.signIn(this.form.value as User).then(res => {
+
+
+
+        this.getUserInfo(res.user.uid);
+
+      }).catch(error => {
+        console.log(error);
+
+        this.utilsSvc.presentToast({
+          message: error.message,
+          duration: 2500,
+          color: 'primary',
+          position: 'middle',
+          icon: 'alert-circle-outline'
+        })
+
+      }).finally(() => {
+        loading.dismiss();
+      })
+    }
+  }
+
+  async getUserInfo(uid: string) {
+    if (this.form.value) {
+
+      const loading = await this.utilsSvc.loading();
+      await loading.present();
+
+      let path = `users/${uid}`
+
+
+      this.firebaseSvc.getDocument(path).then((user: User) => {
+
+        this.utilsSvc.saveInLocalStorage('user', user)
+        this.utilsSvc.routerLink('/main/home');
+        this.form.reset();
+
+
+        this.utilsSvc.presentToast({
+          message: `Te damos la bienvenida ${user}`,
+          duration: 1500,
+          color: 'secondary',
+          position: 'middle',
+          icon: 'person-circle-outline'
+        })
+
+
+
+      }).catch(error => {
+        console.log(error);
+
+        this.utilsSvc.presentToast({
+          message: error.message,
+          duration: 2500,
+          color: 'secondary',
+          position: 'middle',
+          icon: 'alert-circle-outline'
+        })
+
+      }).finally(() => {
+        loading.dismiss();
       })
     }
   }
