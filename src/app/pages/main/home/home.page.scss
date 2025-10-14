@@ -1,0 +1,41 @@
+.titulo {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.opciones-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 40px;
+}
+
+.opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.opcion:hover {
+  transform: scale(1.05);
+}
+
+.opcion img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.opcion p {
+  margin-top: 10px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
