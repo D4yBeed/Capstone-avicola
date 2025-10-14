@@ -1,13 +1,36 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>home</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Bienvenido Diego Santis</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">home</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+
+  <h2 class="titulo">Seleccione una opción</h2>
+
+  <div class="opciones-container">
+<!-- (click)="irA('registro-huevos') -->
+    <div class="opcion" >
+      <img src="assets/img/huevos.png" alt="Huevos" />
+      <p>Huevos</p>
+    </div>
+<!-- (click)="irA('registro-gallinas') -->
+    <div class="opcion" >
+      <img src="assets/img/gallinas.png" alt="Gallinas" />
+      <p>Gallinas</p>
+    </div>
+
+    <div class="opcion" >
+      <img src="assets/img/reportes.png" alt="Reportes" />
+      <p>Reportes</p>
+    </div>
+<!-- (click)="irA('reportes') -->
+  </div>
+
 </ion-content>
+
+<!-- <ion-content [fullscreen]="true">
+  <ion-button (click)="signOut()">
+    cerrar sesion
+  </ion-button>
+</ion-content> -->
