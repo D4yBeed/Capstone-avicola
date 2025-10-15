@@ -1,6 +1,11 @@
 <ion-header>
   <ion-toolbar color="light">
-    <ion-title color="danger" class="title">Registro Diario de Huevos</ion-title>
+    <ion-title color="danger">Registro Diario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/main/profile">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -70,7 +75,4 @@
       </ion-card-content>
     </ion-card>
   </form>
-<ion-button (click)="signOut()">
-    cerrar sesion
-  </ion-button>
 </ion-content>

@@ -1,13 +1,41 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>profile</ion-title>
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/home">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title color="danger" class="title">Perfil de Usuario</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">profile</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="profile-content">
+
+  <div class="profile-wrapper">
+
+    <div class="profile-card">
+      <!-- Avatar -->
+      <div class="avatar">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </div>
+
+      <!-- Información del usuario -->
+      <h2>{{ user?.name || 'Usuario' }}</h2>
+      <p>{{ user?.email }}</p>
+
+      <!-- Modo oscuro -->
+      <ion-item lines="none" class="dark-toggle">
+        <ion-label>Modo oscuro</ion-label>
+        <ion-toggle color="danger" [(ngModel)]="darkMode" (ionChange)="toggleDarkMode()"></ion-toggle>
+      </ion-item>
+
+      <!-- Botón cerrar sesión -->
+      <ion-button expand="block" class="btn-logout" (click)="signOut()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar sesión
+      </ion-button>
+    </div>
+
+  </div>
+
 </ion-content>
