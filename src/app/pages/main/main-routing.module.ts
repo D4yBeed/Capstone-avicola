@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'profile',
     loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
+  },
+  {
+    path: 'registro-huevo',
+    loadChildren: () => import('./registro-huevo/registro-huevo.module').then( m => m.RegistroHuevoPageModule)
   }
 
 ];
