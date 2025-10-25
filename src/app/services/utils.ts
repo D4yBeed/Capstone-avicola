@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { LoadingController, ToastController, ToastOptions } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController, ToastOptions } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 
@@ -11,6 +11,22 @@ export class Utils {
   loadingCtrl = inject(LoadingController)
   toastCtrl = inject(ToastController)
   router = inject(Router)
+  alertCtrl = inject(AlertController);
+
+  // ======= ⚠️ ALERT =======
+  async presentAlert(options: { header?: string; subHeader?: string; message: string; buttons: any[]; }) {
+    const alert = await this.alertCtrl.create({
+      header: options.header || 'Alerta',
+      subHeader: options.subHeader || '',
+      message: options.message,
+      buttons: options.buttons,
+      cssClass: 'custom-alert'
+    });
+    await alert.present();
+  }
+
+
+
 
   // loading
 
