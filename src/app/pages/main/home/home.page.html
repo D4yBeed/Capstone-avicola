@@ -1,36 +1,78 @@
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Bienvenido {{nombreUsuario}}</ion-title>
+  <ion-toolbar color="light">
+    <ion-title color="danger">Registro Diario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/main/profile">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="home-content">
 
-  <h2 class="titulo">Seleccione una opción</h2>
+  <form [formGroup]="form" (ngSubmit)="onSave()" class="home-form">
 
-  <div class="opciones-container">
-<!-- (click)="irA('registro-huevos') -->
-    <div class="opcion" >
-      <img src="assets/img/huevos.png" alt="Huevos" />
-      <p>Huevos</p>
-    </div>
-<!-- (click)="irA('registro-gallinas') -->
-    <div class="opcion" >
-      <img src="assets/img/gallinas.png" alt="Gallinas" />
-      <p>Gallinas</p>
+    <!-- Fecha -->
+    <div class="date-box">
+      <ion-icon name="calendar-outline" class="date-icon"></ion-icon>
+      <span>{{ selectedDate }}</span>
     </div>
 
-    <div class="opcion" >
-      <img src="assets/img/reportes.png" alt="Reportes" />
-      <p>Reportes</p>
-    </div>
-<!-- (click)="irA('reportes') -->
-  </div>
+    <!-- Granja -->
+    <ion-item lines="full" class="selector">
+      <ion-label position="stacked">Granja</ion-label>
+      <ion-select formControlName="farmId">
+        <ion-select-option *ngFor="let f of farms" [value]="f.id">{{ f.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
 
+    <!-- Sector -->
+    <ion-item lines="full" class="selector">
+      <ion-label position="stacked">Sector</ion-label>
+      <ion-select formControlName="sectorId">
+        <ion-select-option *ngFor="let s of sectors" [value]="s.id">{{ s.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Galpón -->
+    <ion-item lines="full" class="selector">
+      <ion-label position="stacked">Galpón</ion-label>
+      <ion-select formControlName="shedId">
+        <ion-select-option *ngFor="let s of sheds" [value]="s.id">{{ s.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Conteo -->
+    <ion-card class="count-card" *ngIf="ready">
+      <ion-card-header>
+        <ion-card-title>Conteo por Calidad y Ubicación</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="count-grid">
+          <div class="count-row" *ngFor="let c of categories">
+            <span class="label">{{ c.label }}</span>
+            <div class="controls">
+              <ion-button size="small" fill="clear" class="btn-minus" (click)="dec(c.key)">−</ion-button>
+              <span class="count">{{ counts[c.key] || 0 }}</span>
+              <ion-button size="small" fill="clear" class="btn-plus" (click)="inc(c.key)">+</ion-button>
+            </div>
+          </div>
+        </div>
+
+        <ion-item lines="none" class="notes">
+          <ion-label position="stacked">Notas</ion-label>
+          <ion-textarea formControlName="notes" placeholder="Observaciones del día..." autoGrow="true"></ion-textarea>
+        </ion-item>
+
+        <div class="total-box">
+          <span>Total diario:</span>
+          <strong>{{ totalDia }}</strong>
+        </div>
+
+        <ion-button expand="block" type="submit" class="btn-save">Guardar Registro</ion-button>
+      </ion-card-content>
+    </ion-card>
+  </form>
 </ion-content>
-
-<!-- <ion-content [fullscreen]="true">
-  <ion-button (click)="signOut()">
-    cerrar sesion
-  </ion-button>
-</ion-content> -->
