@@ -1,105 +1,85 @@
 .profile-content {
-  --background: #f5f5f5;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
+  --background: #fff;
 }
 
-/* Contenedor centrado */
 .profile-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
+  width: 90%;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
-/* Tarjeta principal */
 .profile-card {
   background: #fff;
   border-radius: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 380px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
-  padding: 30px 20px 40px;
-  animation: fadeIn 0.5s ease;
 }
 
-/* Avatar */
 .avatar ion-icon {
-  font-size: 90px;
-  color: #e30613;
+  font-size: 100px;
+  color: var(--ion-color-danger);
+  margin-bottom: 10px;
 }
 
-/* Texto usuario */
 h2 {
   margin: 10px 0 4px;
-  font-weight: 700;
   color: #222;
+  font-weight: bold;
 }
 
 p {
+  margin: 0;
   color: #666;
-  margin-bottom: 20px;
   font-size: 14px;
 }
 
-/* Toggle modo oscuro */
-.dark-toggle {
-  margin-top: 10px;
-  --background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  justify-content: space-between;
+.role-label {
+  margin-top: 5px;
+  font-size: 14px;
 }
 
-/* Botón cerrar sesión */
-.btn-logout {
-  --background: #e30613;
-  --background-hover: #b9050e;
-  --border-radius: 12px;
-  --color: #fff;
+.btn-history,
+.btn-report,
+.btn-users {
+  margin-top: 15px;
+  --border-radius: 10px;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  margin-top: 25px;
-  box-shadow: 0 4px 10px rgba(227, 6, 19, 0.3);
 }
 
-/* Animación suave */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.btn-history {
+  --border-color: var(--ion-color-danger);
+  color: var(--ion-color-danger);
 }
 
-/* 🌙 Modo oscuro */
-body.dark {
-  --ion-background-color: #1e1e1e;
-  --ion-text-color: #f5f5f5;
-  --ion-item-background: #2a2a2a;
-  --ion-color-light: #1e1e1e;
+.btn-history ion-icon {
+  color: var(--ion-color-danger);
 }
 
-body.dark .profile-card {
-  background: #2a2a2a;
-  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.05);
+.btn-report,
+.btn-users {
+  --background: var(--ion-color-danger);
+  color: white;
 }
 
-body.dark h2, body.dark p {
+.btn-report ion-icon,
+.btn-users ion-icon {
+  color: white;
+}
+
+.btn-logout {
+  margin-top: 35px;
+  --background: var(--ion-color-danger);
+  --color: #fff;
+  --border-radius: 12px;
+  font-weight: 600;
+}
+
+.btn-logout ion-icon {
   color: #fff;
 }
 
-body.dark .dark-toggle {
-  --background: #2a2a2a;
-}
-
-body.dark .btn-logout {
-  --background: #e30613;
-}

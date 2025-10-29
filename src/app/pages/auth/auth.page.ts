@@ -15,84 +15,85 @@ export class AuthPage implements OnInit {
   form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required])
-  })
+  });
 
   firebaseSvc = inject(Firebase);
   utilsSvc = inject(Utils);
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   async submit() {
     if (this.form.valid) {
-
       const loading = await this.utilsSvc.loading();
       await loading.present();
 
-      this.firebaseSvc.signIn(this.form.value as User).then(res => {
+      try {
+        // 🔹 Autenticación con Firebase Auth
+        const res = await this.firebaseSvc.signIn(this.form.value as User);
 
+        // 🔹 Obtener información completa del usuario desde Firestore
+        await this.getUserInfo(res.user.uid);
 
-
-        this.getUserInfo(res.user.uid);
-
-      }).catch(error => {
-        console.log(error);
-
+      } catch (error: any) {
+        console.error(error);
         this.utilsSvc.presentToast({
-          message: error.message,
+          message: error.message || 'Error al iniciar sesión',
           duration: 2500,
-          color: 'primary',
+          color: 'danger',
           position: 'middle',
           icon: 'alert-circle-outline'
-        })
-
-      }).finally(() => {
+        });
+      } finally {
         loading.dismiss();
-      })
+      }
     }
   }
 
   async getUserInfo(uid: string) {
-    if (this.form.value) {
+    const loading = await this.utilsSvc.loading();
+    await loading.present();
 
-      const loading = await this.utilsSvc.loading();
-      await loading.present();
+    try {
+      const path = `users/${uid}`;
+      const user = (await this.firebaseSvc.getDocument(path)) as User;
 
-      let path = `users/${uid}`
+      if (user) {
+        // 🧹 Limpiar datos antiguos y guardar el nuevo usuario
+        localStorage.removeItem('user');
+        this.utilsSvc.saveInLocalStorage('user', user);
 
-
-      this.firebaseSvc.getDocument(path).then((user: User) => {
-
-        this.utilsSvc.saveInLocalStorage('user', user)
+        // 👤 Redirigir al home
         this.utilsSvc.routerLink('/main/home');
         this.form.reset();
 
-
+        // 👋 Mensaje de bienvenida
         this.utilsSvc.presentToast({
-          message: `Te damos la bienvenida ${user}`,
-          duration: 1500,
+          message: `Bienvenido ${user.name || user.email}!`,
+          duration: 2000,
           color: 'secondary',
           position: 'middle',
           icon: 'person-circle-outline'
-        })
-
-
-
-      }).catch(error => {
-        console.log(error);
-
+        });
+      } else {
         this.utilsSvc.presentToast({
-          message: error.message,
+          message: 'No se encontraron datos del usuario en la base de datos.',
           duration: 2500,
-          color: 'secondary',
+          color: 'danger',
           position: 'middle',
           icon: 'alert-circle-outline'
-        })
-
-      }).finally(() => {
-        loading.dismiss();
-      })
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      this.utilsSvc.presentToast({
+        message: 'Error al obtener información del usuario',
+        duration: 2500,
+        color: 'danger',
+        position: 'middle',
+        icon: 'alert-circle-outline'
+      });
+    } finally {
+      loading.dismiss();
     }
   }
-
 }

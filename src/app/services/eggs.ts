@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
-  collection, query, where, orderBy, startAt, endAt, limit, getDocs
+  collection, query, where, orderBy, getDocs, limit
 } from '@angular/fire/firestore';
 import { Firebase } from './firebase';
 
@@ -38,15 +38,16 @@ const EMPTY_COUNTS: Record<EggKey, number> = {
   providedIn: 'root'
 })
 export class Eggs {
+
   firebase = inject(Firebase);
 
-  // Ruta del documento
+  // 🔹 Referencia al documento en Firestore
   private ref(farmId: string, shedId: string, date: string) {
     const db = getFirestore();
     return doc(db, `farms/${farmId}/sheds/${shedId}/eggRecords/${date}`);
   }
 
-  // Derivar sector y letra desde shedId (ej: S7B → 7 y B)
+  // 🔹 Derivar sector y letra desde shedId (ej: S7B → 7 y B)
   private deriveSectorMeta(shedId: string): { sectorId: number | null; letter: 'A' | 'B' | null; label: string } {
     const m = /^S(\d+)([AB])$/.exec(shedId || '');
     const sectorId = m ? parseInt(m[1], 10) : null;
@@ -55,7 +56,7 @@ export class Eggs {
     return { sectorId, letter, label };
   }
 
-  // Crear documento si no existe
+  // 🔹 Crear documento si no existe
   async getOrCreate(farmId: string, shedId: string, date: string, userId: string): Promise<EggRecord> {
     const r = this.ref(farmId, shedId, date);
     const snap = await getDoc(r);
@@ -63,7 +64,9 @@ export class Eggs {
 
     const meta = this.deriveSectorMeta(shedId);
     const payload: EggRecord = {
-      date, farmId, shedId,
+      date,
+      farmId,
+      shedId,
       sectorId: meta.sectorId ?? undefined,
       shedLabel: meta.label,
       counts: { ...EMPTY_COUNTS },
@@ -76,13 +79,13 @@ export class Eggs {
     return payload;
   }
 
-  // Obtener registro existente
+  // 🔹 Obtener registro existente
   async getDay(farmId: string, shedId: string, date: string) {
     const snap = await getDoc(this.ref(farmId, shedId, date));
     return snap.exists() ? (snap.data() as EggRecord) : null;
   }
 
-  // Guardar conteos y notas (crea si no existe)
+  // 🔹 Guardar conteos y notas (crea si no existe)
   async upsertCounts(
     farmId: string,
     shedId: string,
@@ -94,7 +97,9 @@ export class Eggs {
     const meta = this.deriveSectorMeta(shedId);
 
     await setDoc(r, {
-      date, farmId, shedId,
+      date: date.toString(),
+      farmId,
+      shedId,
       sectorId: meta.sectorId ?? undefined,
       shedLabel: meta.label,
       counts: { ...EMPTY_COUNTS, ...counts },
@@ -103,7 +108,7 @@ export class Eggs {
     } as any, { merge: true });
   }
 
-  // Incrementar o disminuir categoría
+  // 🔹 Incrementar o disminuir categoría
   async increment(
     farmId: string,
     shedId: string,
@@ -118,7 +123,9 @@ export class Eggs {
     if (!snap.exists()) {
       const baseCounts = { ...EMPTY_COUNTS, [key]: Math.max(0, delta) };
       await setDoc(r, {
-        date, farmId, shedId,
+        date: date.toString(),
+        farmId,
+        shedId,
         sectorId: meta.sectorId ?? undefined,
         shedLabel: meta.label,
         counts: baseCounts,
@@ -139,7 +146,7 @@ export class Eggs {
     return next;
   }
 
-  // Obtener registros por rango (para reportes)
+  // 🔹 Obtener registros por rango (para reportes / historial)
   async listByDateRange(
     farmId: string,
     shedId: string,
@@ -147,20 +154,26 @@ export class Eggs {
     endDate: string
   ): Promise<EggRecord[]> {
     const db = getFirestore();
-    const col = collection(db, `farms/${farmId}/sheds/${shedId}/eggRecords`);
+    const colRef = collection(db, `farms/${farmId}/sheds/${shedId}/eggRecords`);
+
+    // ✅ Filtrar correctamente por rango de fecha (campo string)
     const q = query(
-      col,
-      where('farmId', '==', farmId),
-      where('shedId', '==', shedId),
-      orderBy('date', 'asc'),
-      startAt(startDate),
-      endAt(endDate),
-      limit(31)
+      colRef,
+      where('date', '>=', startDate),
+      where('date', '<=', endDate),
+      orderBy('date', 'desc')
     );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => d.data() as EggRecord);
+
+    try {
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(d => d.data() as EggRecord);
+    } catch (error) {
+      console.error('🔥 Error en listByDateRange:', error);
+      throw error;
+    }
   }
 
+  // 🔹 Obtener últimos N días (por defecto 7)
   async listLastNDays(
     farmId: string,
     shedId: string,
@@ -171,9 +184,11 @@ export class Eggs {
     return this.listByDateRange(farmId, shedId, start, endDate);
   }
 
+  // 🔹 Utilidad para sumar/restar días
   private addDays(dateYmd: string, offset: number): string {
     const d = new Date(dateYmd + 'T00:00:00');
     d.setDate(d.getDate() + offset);
     return d.toISOString().slice(0, 10);
   }
+
 }
