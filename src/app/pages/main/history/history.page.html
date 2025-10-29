@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/home">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title color="danger">Historial de los últimos 7 días</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="history-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="loadHistory(); $event.target.complete()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-spinner ngIf="loading" name="crescent" class="spinner"></ion-spinner>
+
+  <ion-listngIf="!loading && records.length > 0">
+    <ion-item ngFor="let r of records">
+      <ion-label>
+        <h2>{{ r.date }}</h2>
+        <p>Incubables nido: {{ r.counts?.incubables_nido  0 }}</p>
+        <p>Incubables piso: {{ r.counts?.incubables_piso  0 }}</p>
+        <p>Sucios nido: {{ r.counts?.sucios_nido  0 }}</p>
+        <p>Sucios piso: {{ r.counts?.sucios_piso  0 }}</p>
+        <p>Trizados nido: {{ r.counts?.trizados_nido  0 }}</p>
+        <p>Trizados piso: {{ r.counts?.trizados_piso  0 }}</p>
+        <p>Dobles nido: {{ r.counts?.dobles_nido  0 }}</p>
+        <p>Dobles piso: {{ r.counts?.dobles_piso  0 }}</p>
+        <p class="notes"ngIf="r.notes">📝 {{ r.notes }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-text *ngIf="!loading && records.length === 0" class="empty">
+    No hay registros en los últimos 7 días.
+  </ion-text>
+</ion-content>
