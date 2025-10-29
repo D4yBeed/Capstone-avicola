@@ -3,7 +3,7 @@
     <ion-title color="danger">Registro Diario</ion-title>
     <ion-buttons slot="end">
       <ion-button routerLink="/main/profile">
-        <ion-icon name="person-circle-outline"></ion-icon>
+        <ion-icon name="person-circle-outline" color="danger"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -22,7 +22,7 @@
     <!-- Granja -->
     <ion-item lines="full" class="selector">
       <ion-label position="stacked">Granja</ion-label>
-      <ion-select formControlName="farmId">
+      <ion-select formControlName="farmId" interface="popover" color="danger">
         <ion-select-option *ngFor="let f of farms" [value]="f.id">{{ f.name }}</ion-select-option>
       </ion-select>
     </ion-item>
@@ -30,7 +30,7 @@
     <!-- Sector -->
     <ion-item lines="full" class="selector">
       <ion-label position="stacked">Sector</ion-label>
-      <ion-select formControlName="sectorId">
+      <ion-select formControlName="sectorId" interface="popover" color="danger" [disabled]="user?.role === 'pollero'">
         <ion-select-option *ngFor="let s of sectors" [value]="s.id">{{ s.name }}</ion-select-option>
       </ion-select>
     </ion-item>
@@ -38,7 +38,7 @@
     <!-- Galpón -->
     <ion-item lines="full" class="selector">
       <ion-label position="stacked">Galpón</ion-label>
-      <ion-select formControlName="shedId">
+      <ion-select formControlName="shedId" interface="popover" color="danger" [disabled]="user?.role === 'pollero'">
         <ion-select-option *ngFor="let s of sheds" [value]="s.id">{{ s.name }}</ion-select-option>
       </ion-select>
     </ion-item>
@@ -46,7 +46,7 @@
     <!-- Conteo -->
     <ion-card class="count-card" *ngIf="ready">
       <ion-card-header>
-        <ion-card-title>Conteo por Calidad y Ubicación</ion-card-title>
+        <ion-card-title color="danger" class="ion-text-center">Conteo por Calidad y Ubicación</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
@@ -54,24 +54,36 @@
           <div class="count-row" *ngFor="let c of categories">
             <span class="label">{{ c.label }}</span>
             <div class="controls">
-              <ion-button size="small" fill="clear" class="btn-minus" (click)="dec(c.key)">−</ion-button>
+              <ion-button size="small" fill="solid" color="light" class="btn-minus" (click)="dec(c.key)">
+                <ion-icon name="remove-outline"></ion-icon>
+              </ion-button>
+
               <span class="count">{{ counts[c.key] || 0 }}</span>
-              <ion-button size="small" fill="clear" class="btn-plus" (click)="inc(c.key)">+</ion-button>
+
+              <ion-button size="small" fill="solid" color="danger" class="btn-plus" (click)="inc(c.key)">
+                <ion-icon name="add-outline"></ion-icon>
+              </ion-button>
             </div>
           </div>
         </div>
 
+        <!-- Notas -->
         <ion-item lines="none" class="notes">
           <ion-label position="stacked">Notas</ion-label>
           <ion-textarea formControlName="notes" placeholder="Observaciones del día..." autoGrow="true"></ion-textarea>
         </ion-item>
 
+        <!-- Total -->
         <div class="total-box">
           <span>Total diario:</span>
           <strong>{{ totalDia }}</strong>
         </div>
 
-        <ion-button expand="block" type="submit" class="btn-save">Guardar Registro</ion-button>
+        <!-- Botón Guardar -->
+        <ion-button expand="block" type="submit" class="btn-save" color="danger">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          Guardar Registro
+        </ion-button>
       </ion-card-content>
     </ion-card>
   </form>

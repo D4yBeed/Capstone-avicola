@@ -5,6 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { Eggs, EggKey } from 'src/app/services/eggs';
 import { Firebase } from 'src/app/services/firebase';
 import { Utils } from 'src/app/services/utils';
+import { User } from 'src/app/models/user.model';
 
 type Shed = { id: string; name: string; sector: number; letter: 'A' | 'B' };
 
@@ -16,23 +17,21 @@ type Shed = { id: string; name: string; sector: number; letter: 'A' | 'B' };
 })
 export class HomePage implements OnInit {
   form!: FormGroup;
+  user!: User;
   userId: string | null = null;
   ready = false;
 
-  // Visualización
-  selectedDate = ''; // 'YYYY-MM-DD'
+  selectedDate = ''; // YYYY-MM-DD
   totalDia = 0;
 
-  // Granja fija
   farms = [{ id: 'ELMOLLE', name: 'Granja El Molle' }];
 
-  // Sectores y galpones A/B
   sectors = Array.from({ length: 7 }, (_, i) => ({ id: i + 1, name: `Sector ${i + 1}` }));
 
   allSheds: Shed[] = Array.from({ length: 7 }, (_, i) => i + 1).reduce((acc, sector) => {
     (['A', 'B'] as ('A' | 'B')[]).forEach(letter => {
       acc.push({
-        id: `S${sector}${letter}`, // ej: S1A
+        id: `S${sector}${letter}`,
         name: `Sector ${sector} - Galpón ${letter}`,
         sector,
         letter
@@ -41,7 +40,6 @@ export class HomePage implements OnInit {
     return acc;
   }, [] as Shed[]);
 
-  // Galpones filtrados según sector elegido
   sheds: Shed[] = [];
 
   categories: { key: EggKey; label: string }[] = [
@@ -62,57 +60,68 @@ export class HomePage implements OnInit {
     dobles_nido: 0, dobles_piso: 0,
   };
 
-  constructor(
-    private fb: FormBuilder,
-    private eggsSvc: Eggs,
-    private fbSvc: Firebase,
-    private utils: Utils
-  ) {}
-  
   firebaseSvc = inject(Firebase);
-//   utilsSvc = inject(Utils);
+  utilsSvc = inject(Utils);
+  eggsSvc = inject(Eggs);
+  fb = inject(FormBuilder);
 
   ngOnInit(): void {
+    this.user = this.utilsSvc.getFromLocalStorage('user');
+
     const todayISO = this.todayLocalISO();
-    const todayYMD = todayISO.slice(0, 10);
-    this.selectedDate = todayYMD;
+    this.selectedDate = todayISO.slice(0, 10);
 
-    // Sector y galpón por defecto
-    const defaultSector = this.sectors[0].id; // 1
-    this.sheds = this.allSheds.filter(s => s.sector === defaultSector);
+    // Filtro inicial según el rol del usuario
+    this.sheds = this.filterShedsByRole();
 
-    // Formulario
+    const defaultSector = this.sheds[0]?.sector || 1;
+
     this.form = this.fb.group({
       date: [todayISO],
       farmId: [this.farms[0]?.id || ''],
       sectorId: [defaultSector],
       shedId: [this.sheds[0]?.id || ''],
-      notes: [''],
+      notes: ['']
     });
 
-    // Cambia lista de galpones según sector seleccionado
-    this.form.get('sectorId')!.valueChanges.subscribe((sec: number) => {
-      this.sheds = this.allSheds.filter(s => s.sector === Number(sec));
-      const first = this.sheds[0]?.id || '';
-      this.form.patchValue({ shedId: first }, { emitEvent: false });
-      this.loadRecord();
-    });
+    // Solo encargados o supervisores pueden cambiar sector/galpón
+    if (this.user.role !== 'pollero') {
+      this.form.get('sectorId')!.valueChanges.subscribe((sec: number) => {
+        this.sheds = this.allSheds.filter(s => s.sector === Number(sec));
+        this.form.patchValue({ shedId: this.sheds[0]?.id || '' }, { emitEvent: false });
+        this.loadRecord();
+      });
+    }
 
-    // Esperar autenticación y cargar registro actual
-    onAuthStateChanged(this.fbSvc.getAuth(), async (u) => {
+    // Carga inicial del registro del día
+    onAuthStateChanged(this.firebaseSvc.getAuth(), async (u) => {
       this.userId = u?.uid ?? null;
       if (this.userId) {
         await this.loadRecord();
-        // Reaccionar si cambia la granja o el galpón
-        this.form.get('farmId')!.valueChanges.subscribe(() => this.loadRecord());
-        this.form.get('shedId')!.valueChanges.subscribe(() => this.loadRecord());
+        if (this.user.role !== 'pollero') {
+          this.form.get('farmId')!.valueChanges.subscribe(() => this.loadRecord());
+          this.form.get('shedId')!.valueChanges.subscribe(() => this.loadRecord());
+        }
       } else {
         this.ready = false;
       }
     });
   }
 
-  // Fecha actual local en formato ISO
+  // 🧩 Filtra los galpones según el rol
+  private filterShedsByRole(): Shed[] {
+    if (!this.user) return this.allSheds;
+
+    if (this.user.role === 'pollero' && this.user.assignedShed) {
+      // ✅ El pollero solo ve su galpón asignado
+      const shed = this.allSheds.find(s => s.id === this.user.assignedShed);
+      return shed ? [shed] : [];
+    }
+
+    // ✅ Supervisores y encargados ven todo
+    return this.allSheds;
+  }
+
   private todayLocalISO(): string {
     const now = new Date();
     const tzOffset = now.getTimezoneOffset();
@@ -125,15 +134,7 @@ export class HomePage implements OnInit {
   }
 
   private calcTotal() {
-    this.totalDia =
-      (this.counts.incubables_nido || 0) +
-      (this.counts.incubables_piso || 0) +
-      (this.counts.sucios_nido || 0) +
-      (this.counts.sucios_piso || 0) +
-      (this.counts.trizados_nido || 0) +
-      (this.counts.trizados_piso || 0) +
-      (this.counts.dobles_nido || 0) +
-      (this.counts.dobles_piso || 0);
+    this.totalDia = Object.values(this.counts).reduce((a, b) => a + b, 0);
   }
 
   private async loadRecord() {
@@ -153,7 +154,7 @@ export class HomePage implements OnInit {
       this.ready = true;
     } catch (e) {
       this.ready = false;
-      this.utils.presentToast({ message: 'No se pudo cargar el registro', color: 'danger', duration: 1800 });
+      this.utilsSvc.presentToast({ message: 'No se pudo cargar el registro', color: 'danger', duration: 1800 });
       console.error(e);
     }
   }
@@ -165,7 +166,7 @@ export class HomePage implements OnInit {
       this.counts[key] = next;
       this.calcTotal();
     } catch (e) {
-      this.utils.presentToast({ message: 'Error al aumentar', color: 'danger', duration: 1500 });
+      this.utilsSvc.presentToast({ message: 'Error al aumentar', color: 'danger', duration: 1500 });
       console.error(e);
     }
   }
@@ -178,69 +179,61 @@ export class HomePage implements OnInit {
       this.counts[key] = next;
       this.calcTotal();
     } catch (e) {
-      this.utils.presentToast({ message: 'Error al disminuir', color: 'danger', duration: 1500 });
+      this.utilsSvc.presentToast({ message: 'Error al disminuir', color: 'danger', duration: 1500 });
       console.error(e);
     }
   }
 
   async onSave() {
-    try {
-      const date = this.isoToYmd(this.form.value.date);
-      await this.eggsSvc.upsertCounts(
-        this.form.value.farmId,
-        this.form.value.shedId,
-        date,
-        this.counts,
-        this.form.value.notes
-      );
-      this.utils.presentToast({ message: 'Guardado', color: 'success', duration: 1400 });
-    } catch (e) {
-      this.utils.presentToast({ message: 'No se pudo guardar', color: 'danger', duration: 1800 });
-      console.error(e);
+  try {
+    const date = this.isoToYmd(this.form.value.date);
+    const { farmId, shedId } = this.form.value;
+
+    // Verificar si ya existe un registro del mismo día y galpón
+    const existing = await this.eggsSvc.getDay(farmId, shedId, date);
+
+    if (existing) {
+      this.utilsSvc.presentToast({
+        message: 'Ya existe un registro para este día y galpón.',
+        color: 'warning',
+        duration: 2500,
+        position: 'middle',
+        icon: 'alert-circle-outline'
+      });
+      return; // Evita guardar otro registro
     }
+
+    // Si no existe, guardar normalmente
+    await this.eggsSvc.upsertCounts(
+      farmId,
+      shedId,
+      date,
+      this.counts,
+      this.form.value.notes
+    );
+
+    this.utilsSvc.presentToast({
+      message: 'Registro guardado exitosamente',
+      color: 'success',
+      duration: 1800,
+      position: 'middle',
+      icon: 'checkmark-circle-outline'
+    });
+
+  } catch (e) {
+    console.error(e);
+    this.utilsSvc.presentToast({
+      message: 'No se pudo guardar el registro',
+      color: 'danger',
+      duration: 2000,
+      position: 'middle',
+      icon: 'alert-circle-outline'
+    });
   }
-// cerrar sesion
+}
+
 
   signOut() {
     this.firebaseSvc.signOut();
   }
 }
-
-
-
-  
-
-  
-
-
-
-  
-
-
-
-// import { Component, inject, OnInit } from '@angular/core';
-// import { Firebase } from 'src/app/services/firebase';
-// import { Utils } from 'src/app/services/utils';
-
-// @Component({
-//   selector: 'app-home',
-//   templateUrl: './home.page.html',
-//   styleUrls: ['./home.page.scss'],
-//   standalone: false
-// })
-// export class HomePage implements OnInit {
-
-//   firebaseSvc = inject(Firebase);
-//   utilsSvc = inject(Utils);
-
-//   ngOnInit() {
-//   }
-
-
-//   // cerrar sesion
-
-//   signOut() {
-//     this.firebaseSvc.signOut();
-//   }
-
-// }

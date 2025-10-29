@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/main/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title color="danger">Administrar Usuarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Formulario para crear usuario -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Crear nuevo usuario</ion-card-title>
+      <ion-card-subtitle>Solo para supervisores</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="form" (ngSubmit)="createUser()">
+
+        <ion-item>
+          <ion-label position="floating">Nombre</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Correo</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Rol del usuario</ion-label>
+          <ion-select formControlName="role" interface="popover" color="danger">
+            <ion-select-option value="supervisor">Supervisor</ion-select-option>
+            <ion-select-option value="encargado">Encargado</ion-select-option>
+            <ion-select-option value="pollero">Pollero</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item *ngIf="form.value.role === 'pollero'">
+          <ion-label position="stacked">Asignar galpón</ion-label>
+          <ion-select formControlName="assignedShed" interface="popover" color="danger">
+            <ion-select-option *ngFor="let shed of sheds" [value]="shed.id">{{ shed.label }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-button expand="block" color="danger" class="ion-margin-top" type="submit">
+          <ion-icon name="person-add-outline" slot="start"></ion-icon>
+          Crear usuario
+        </ion-button>
+
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de usuarios -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Usuarios existentes</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let u of users">
+          <ion-label>
+            <h2>{{ u.name }}</h2>
+            <p>{{ u.email }}</p>
+            <p><strong>Rol:</strong> {{ u.role | titlecase }}</p>
+            <p *ngIf="u.assignedShed">Galpón: {{ u.assignedShed }}</p>
+          </ion-label>
+
+          <ion-button fill="outline" size="small" color="success" (click)="updateRole(u.id, 'supervisor')">Supervisor</ion-button>
+          <ion-button fill="outline" size="small" color="warning" (click)="updateRole(u.id, 'encargado')">Encargado</ion-button>
+          <ion-button fill="outline" size="small" color="medium" (click)="updateRole(u.id, 'pollero')">Pollero</ion-button>
+
+          <ion-button fill="clear" size="small" color="danger" (click)="deleteUser(u.id)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
