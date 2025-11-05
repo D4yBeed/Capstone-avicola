@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { onAuthStateChanged } from 'firebase/auth';
+import { collection, getFirestore, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 
 import { Eggs, EggKey } from 'src/app/services/eggs';
 import { Firebase } from 'src/app/services/firebase';
@@ -71,9 +72,7 @@ export class HomePage implements OnInit {
     const todayISO = this.todayLocalISO();
     this.selectedDate = todayISO.slice(0, 10);
 
-    // Filtro inicial según el rol del usuario
     this.sheds = this.filterShedsByRole();
-
     const defaultSector = this.sheds[0]?.sector || 1;
 
     this.form = this.fb.group({
@@ -84,7 +83,6 @@ export class HomePage implements OnInit {
       notes: ['']
     });
 
-    // Solo encargados o supervisores pueden cambiar sector/galpón
     if (this.user.role !== 'pollero') {
       this.form.get('sectorId')!.valueChanges.subscribe((sec: number) => {
         this.sheds = this.allSheds.filter(s => s.sector === Number(sec));
@@ -93,32 +91,24 @@ export class HomePage implements OnInit {
       });
     }
 
-    // Carga inicial del registro del día
     onAuthStateChanged(this.firebaseSvc.getAuth(), async (u) => {
       this.userId = u?.uid ?? null;
       if (this.userId) {
         await this.loadRecord();
-        if (this.user.role !== 'pollero') {
-          this.form.get('farmId')!.valueChanges.subscribe(() => this.loadRecord());
-          this.form.get('shedId')!.valueChanges.subscribe(() => this.loadRecord());
-        }
       } else {
         this.ready = false;
       }
     });
   }
 
-  // 🧩 Filtra los galpones según el rol
   private filterShedsByRole(): Shed[] {
     if (!this.user) return this.allSheds;
 
     if (this.user.role === 'pollero' && this.user.assignedShed) {
-      // ✅ El pollero solo ve su galpón asignado
       const shed = this.allSheds.find(s => s.id === this.user.assignedShed);
       return shed ? [shed] : [];
     }
 
-    // ✅ Supervisores y encargados ven todo
     return this.allSheds;
   }
 
@@ -138,31 +128,60 @@ export class HomePage implements OnInit {
   }
 
   private async loadRecord() {
-    try {
-      if (!this.userId) return;
-      const date = this.isoToYmd(this.form.value.date);
-      const { farmId, shedId } = this.form.value;
-      if (!farmId || !shedId) return;
+  try {
+    if (!this.userId) return;
+    const date = this.isoToYmd(this.form.value.date);
+    const { farmId, shedId } = this.form.value;
+    if (!farmId || !shedId) return;
 
-      this.selectedDate = date;
+    this.selectedDate = date;
 
-      const rec = await this.eggsSvc.getOrCreate(farmId, shedId, date, this.userId);
+    // Obtener el registro del día
+   const rec = await this.eggsSvc.getDay(farmId, shedId, date, this.userId);
+
+
+    // 🔒 Si ya existe un registro hecho por el pollero, bloquear edición
+    if (rec && rec.userId === this.userId && this.user.role === 'pollero') {
       this.counts = { ...(rec.counts as any) };
       this.form.patchValue({ notes: rec.notes ?? '' }, { emitEvent: false });
-
-      this.calcTotal();
       this.ready = true;
-    } catch (e) {
-      this.ready = false;
-      this.utilsSvc.presentToast({ message: 'No se pudo cargar el registro', color: 'danger', duration: 1800 });
-      console.error(e);
+
+      // ⚠️ Deshabilitar botón Guardar (ya hizo su registro)
+      this.form.disable();
+
+      this.utilsSvc.presentToast({
+        message: 'Ya realizaste tu registro para este día. No puedes modificarlo.',
+        color: 'warning',
+        duration: 2500,
+        position: 'middle',
+        icon: 'alert-circle-outline'
+      });
+      return;
     }
+
+    // Si no hay registro previo, crear uno nuevo
+    const record = await this.eggsSvc.getOrCreate(farmId, shedId, date, this.userId);
+    this.counts = { ...(record.counts as any) };
+    this.form.patchValue({ notes: record.notes ?? '' }, { emitEvent: false });
+
+    this.calcTotal();
+    this.ready = true;
+  } catch (e) {
+    this.ready = false;
+    this.utilsSvc.presentToast({
+      message: 'No se pudo cargar el registro',
+      color: 'danger',
+      duration: 1800
+    });
+    console.error(e);
   }
+}
+
 
   async inc(key: EggKey) {
     try {
       const date = this.isoToYmd(this.form.value.date);
-      const next = await this.eggsSvc.increment(this.form.value.farmId, this.form.value.shedId, date, key, 1);
+      const next = await this.eggsSvc.increment(this.form.value.farmId, this.form.value.shedId, date, key, 1, this.userId!);
       this.counts[key] = next;
       this.calcTotal();
     } catch (e) {
@@ -175,7 +194,7 @@ export class HomePage implements OnInit {
     try {
       if ((this.counts[key] || 0) === 0) return;
       const date = this.isoToYmd(this.form.value.date);
-      const next = await this.eggsSvc.increment(this.form.value.farmId, this.form.value.shedId, date, key, -1);
+      const next = await this.eggsSvc.increment(this.form.value.farmId, this.form.value.shedId, date, key, -1, this.userId!);
       this.counts[key] = next;
       this.calcTotal();
     } catch (e) {
@@ -187,30 +206,33 @@ export class HomePage implements OnInit {
   async onSave() {
   try {
     const date = this.isoToYmd(this.form.value.date);
-    const { farmId, shedId } = this.form.value;
+    const { farmId, shedId, notes } = this.form.value;
 
-    // Verificar si ya existe un registro del mismo día y galpón
-    const existing = await this.eggsSvc.getDay(farmId, shedId, date);
+    if (!this.userId) {
+      this.utilsSvc.presentToast({
+        message: 'Usuario no identificado',
+        color: 'danger',
+        duration: 2000,
+        position: 'middle'
+      });
+      return;
+    }
 
+    // 🔎 Verificar si ya existe un registro de este usuario en este galpón hoy
+    const existing = await this.eggsSvc.getDay(farmId, shedId, date, this.userId);
     if (existing) {
       this.utilsSvc.presentToast({
-        message: 'Ya existe un registro para este día y galpón.',
+        message: 'Ya realizaste un registro hoy en tu galpón.',
         color: 'warning',
         duration: 2500,
         position: 'middle',
         icon: 'alert-circle-outline'
       });
-      return; // Evita guardar otro registro
+      return;
     }
 
-    // Si no existe, guardar normalmente
-    await this.eggsSvc.upsertCounts(
-      farmId,
-      shedId,
-      date,
-      this.counts,
-      this.form.value.notes
-    );
+    // ✅ Guardar nuevo registro
+    await this.eggsSvc.upsertCounts(farmId, shedId, date, this.counts, notes, this.userId);
 
     this.utilsSvc.presentToast({
       message: 'Registro guardado exitosamente',
@@ -220,8 +242,8 @@ export class HomePage implements OnInit {
       icon: 'checkmark-circle-outline'
     });
 
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     this.utilsSvc.presentToast({
       message: 'No se pudo guardar el registro',
       color: 'danger',
@@ -231,6 +253,8 @@ export class HomePage implements OnInit {
     });
   }
 }
+
+
 
 
   signOut() {
