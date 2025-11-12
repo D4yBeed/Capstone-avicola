@@ -1,52 +1,158 @@
+.home-content {
+  --background: #fafafa;
+  padding: 12px;
+}
+
+.date-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffeaea;
+  color: #c62828;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 10px auto;
+  width: fit-content;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.date-icon {
+  margin-right: 6px;
+  font-size: 18px;
+}
+
+/* 🔒 Banner modo solo lectura */
+.readonly-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3e0;
+  color: #e65100;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 8px 4px 12px;
+  font-size: 0.9rem;
+  border: 1px solid #ffe0b2;
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+.selectors-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 14px;
+
+  ion-item {
+    --background: transparent;
+    --highlight-color-focused: #e53935;
+  }
+}
+
+.count-card {
+  border-radius: 18px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.count-title {
+  color: #d32f2f;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-top: 6px;
+}
+
 .count-grid {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 6px;
 }
 
 .count-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
 }
 
 .controls {
   display: flex;
   align-items: center;
   gap: 6px;
+
+  .btn-minus,
+  .btn-plus {
+    --border-radius: 8px;
+    min-width: 34px;
+    min-height: 30px;
+    font-size: 1.1rem;
+  }
+
+  .btn-minus {
+    --background: #f5f5f5;
+    color: #c62828;
+  }
+
+  .btn-plus {
+    --background: #c62828;
+    color: white;
+  }
+
+  .count {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 600;
+  }
 }
 
-.count {
-  min-width: 30px;
+/* 💡 Estado deshabilitado visualmente más claro */
+.btn-minus[disabled],
+.btn-plus[disabled] {
+  opacity: 0.5;
+}
+
+/* También puedes marcar el botón guardar cuando está deshabilitado */
+.btn-save[disabled] {
+  opacity: 0.6;
+}
+
+.notes {
+  margin-top: 16px;
+
+  ion-textarea {
+    border-radius: 12px;
+    background: #f9f9f9;
+    padding: 8px;
+  }
+}
+
+.total-box {
   text-align: center;
-  font-weight: bold;
+  margin: 14px 0;
+  font-weight: 600;
+  color: #c62828;
   font-size: 1.1rem;
 }
 
 .btn-save {
-  margin-top: 20px;
-  border-radius: 10px;
+  --background: #c62828;
+  color: white;
+  --border-radius: 10px;
+  margin-top: 8px;
   font-weight: 600;
-}
-
-.total-box {
-  margin-top: 15px;
-  font-size: 1rem;
-  text-align: center;
-}
-
-.notes {
-  margin-top: 15px;
-}
-
-.date-box {
-  text-align: center;
-  font-weight: 500;
-  color: var(--ion-color-danger);
-  margin-bottom: 15px;
-}
-
-.date-icon {
-  vertical-align: middle;
-  margin-right: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
