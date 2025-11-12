@@ -19,27 +19,39 @@
       <span>{{ selectedDate }}</span>
     </div>
 
+    <!-- ⚠️ Aviso si el formulario está en solo lectura -->
+    <div *ngIf="form?.disabled" class="readonly-banner">
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      <span>Registro en modo solo lectura. No puedes modificar este día.</span>
+    </div>
+
     <!-- Selectores -->
     <ion-card class="selectors-card">
       <ion-card-content>
         <ion-item lines="full">
           <ion-label position="stacked">Granja</ion-label>
           <ion-select formControlName="farmId">
-            <ion-select-option *ngFor="let f of farms" [value]="f.id">{{ f.name }}</ion-select-option>
+            <ion-select-option *ngFor="let f of farms" [value]="f.id">
+              {{ f.name }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
 
         <ion-item lines="full">
           <ion-label position="stacked">Sector</ion-label>
           <ion-select formControlName="sectorId">
-            <ion-select-option *ngFor="let s of sectors" [value]="s.id">{{ s.name }}</ion-select-option>
+            <ion-select-option *ngFor="let s of sectors" [value]="s.id">
+              {{ s.name }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
 
         <ion-item lines="none">
           <ion-label position="stacked">Galpón</ion-label>
           <ion-select formControlName="shedId">
-            <ion-select-option *ngFor="let s of sheds" [value]="s.id">{{ s.name }}</ion-select-option>
+            <ion-select-option *ngFor="let s of sheds" [value]="s.id">
+              {{ s.name }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
       </ion-card-content>
@@ -48,7 +60,9 @@
     <!-- Conteo -->
     <ion-card class="count-card" *ngIf="ready">
       <ion-card-header>
-        <ion-card-title class="count-title">Conteo por Calidad y Ubicación</ion-card-title>
+        <ion-card-title class="count-title">
+          Conteo por Calidad y Ubicación
+        </ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
@@ -56,15 +70,35 @@
           <div class="count-row" *ngFor="let c of categories">
             <span class="label">{{ c.label }}</span>
             <div class="controls">
-              <ion-button size="small" fill="solid" color="light" class="btn-minus" (click)="dec(c.key)">−</ion-button>
+              <ion-button
+                size="small"
+                fill="solid"
+                color="light"
+                class="btn-minus"
+                (click)="dec(c.key)"
+                [disabled]="form?.disabled"
+              >
+                −
+              </ion-button>
+
               <span class="count">{{ counts[c.key] || 0 }}</span>
-              <ion-button size="small" fill="solid" color="danger" class="btn-plus" (click)="inc(c.key)">+</ion-button>
+
+              <ion-button
+                size="small"
+                fill="solid"
+                color="danger"
+                class="btn-plus"
+                (click)="inc(c.key)"
+                [disabled]="form?.disabled"
+              >
+                +
+              </ion-button>
             </div>
           </div>
         </div>
 
         <ion-item lines="none" class="notes">
-          <ion-label position="stacked"> Notas</ion-label>
+          <ion-label position="stacked">Notas</ion-label>
           <ion-textarea
             formControlName="notes"
             placeholder="Observaciones del día..."
@@ -77,7 +111,12 @@
           <strong>{{ totalDia }}</strong>
         </div>
 
-        <ion-button expand="block" type="submit" class="btn-save">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-save"
+          [disabled]="form?.disabled"
+        >
           <ion-icon name="save-outline" slot="start"></ion-icon>
           Guardar Registro
         </ion-button>
@@ -85,3 +124,4 @@
     </ion-card>
   </form>
 </ion-content>
+

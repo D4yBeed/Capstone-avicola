@@ -75,7 +75,7 @@ export class HistoryPage implements OnInit {
     this.records.sort((a, b) => (a.date < b.date ? 1 : -1));
 
   } catch (err) {
-    console.error('❌ Error al cargar historial:', err);
+    console.error(' Error al cargar historial:', err);
     this.utilsSvc.presentToast({
       message: 'Error al cargar el historial',
       color: 'danger',

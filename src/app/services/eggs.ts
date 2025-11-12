@@ -1,7 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
-  collection, query, where, orderBy, getDocs
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs
 } from '@angular/fire/firestore';
 import { Firebase } from './firebase';
 
@@ -21,7 +30,7 @@ export interface EggRecord {
   shedLabel?: string;
   counts: Record<EggKey, number>;
   notes?: string;
-  userId: string;
+  userId: string;       // UID del pollero que hizo el registro
   createdAt?: any;
   updatedAt?: any;
 }
@@ -41,13 +50,13 @@ export class Eggs {
 
   firebase = inject(Firebase);
 
-// 🔹 Genera una referencia única por usuario y día
-private ref(farmId: string, shedId: string, date: string, userId: string) {
-  const db = getFirestore();
-  const docId = `${date}_${userId}`; // 👈 documento único por usuario y fecha
-  return doc(db, `farms/${farmId}/sheds/${shedId}/eggRecords/${docId}`);
-}
-
+  // 🔹 Referencia única por galpón + día
+  // Un doc por día por galpón: farms/{farmId}/sheds/{shedId}/eggRecords/{date}
+  private ref(farmId: string, shedId: string, date: string) {
+    const db = getFirestore();
+    const docId = date; // único por fecha dentro del galpón
+    return doc(db, `farms/${farmId}/sheds/${shedId}/eggRecords/${docId}`);
+  }
 
   // Derivar meta desde shedId (S7B → 7 y B)
   private deriveSectorMeta(shedId: string): { sectorId: number | null; letter: 'A' | 'B' | null; label: string } {
@@ -58,106 +67,119 @@ private ref(farmId: string, shedId: string, date: string, userId: string) {
     return { sectorId, letter, label };
   }
 
-  // 🔹 Crear registro si no existe
-async getOrCreate(farmId: string, shedId: string, date: string, userId: string): Promise<EggRecord> {
-  const r = this.ref(farmId, shedId, date, userId);
-  const snap = await getDoc(r);
-  if (snap.exists()) return snap.data() as EggRecord;
+  // 🔹 Obtener registro del día (si existe) para ese galpón
+  async getDay(
+    farmId: string,
+    shedId: string,
+    date: string
+  ): Promise<EggRecord | null> {
+    const r = this.ref(farmId, shedId, date);
+    const snap = await getDoc(r);
+    return snap.exists() ? (snap.data() as EggRecord) : null;
+  }
 
-  const meta = this.deriveSectorMeta(shedId);
-  const payload: EggRecord = {
-    date,
-    farmId,
-    shedId,
-    sectorId: meta.sectorId ?? undefined,
-    shedLabel: meta.label,
-    counts: { ...EMPTY_COUNTS },
-    userId,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
+  // 🔹 Guardar o actualizar registro (crear/merge) para ese galpón y día
+  async upsertCounts(
+    farmId: string,
+    shedId: string,
+    date: string,
+    counts: Partial<Record<EggKey, number>>,
+    notes: string | undefined,
+    userId: string
+  ): Promise<void> {
+    const r = this.ref(farmId, shedId, date);
+    const meta = this.deriveSectorMeta(shedId);
 
-  await setDoc(r, payload);
-  return payload;
-}
+    await setDoc(
+      r,
+      {
+        date,
+        farmId,
+        shedId,
+        sectorId: meta.sectorId ?? undefined,
+        shedLabel: meta.label,
+        counts: { ...EMPTY_COUNTS, ...counts },
+        ...(notes ? { notes } : {}),
+        userId,                      // quién hizo el registro
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+  }
 
-// 🔹 Obtener registro existente de un usuario en su galpón y fecha
-async getDay(farmId: string, shedId: string, date: string, userId: string) {
-  const r = this.ref(farmId, shedId, date, userId);
-  const snap = await getDoc(r);
-  return snap.exists() ? (snap.data() as EggRecord) : null;
-}
-
-
-
-  // 🔹 Guardar o actualizar registro
-async upsertCounts(
-  farmId: string,
-  shedId: string,
-  date: string,
-  counts: Partial<Record<EggKey, number>>,
-  notes: string | undefined,
-  userId: string
-): Promise<void> {
-  const r = this.ref(farmId, shedId, date, userId);
-  const meta = this.deriveSectorMeta(shedId);
-
-  await setDoc(r, {
-    date,
-    farmId,
-    shedId,
-    sectorId: meta.sectorId ?? undefined,
-    shedLabel: meta.label,
-    counts: { ...EMPTY_COUNTS, ...counts },
-    ...(notes ? { notes } : {}),
-    userId,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-}
-
-  // 🔹 Incrementar o disminuir valores
-  async increment(farmId: string, shedId: string, date: string, key: EggKey, delta: number, userId: string): Promise<number> {
-    const r = this.ref(farmId, shedId, date, userId);
+  // 🔹 Incrementar o disminuir valores del día en ese galpón
+  async increment(
+    farmId: string,
+    shedId: string,
+    date: string,
+    key: EggKey,
+    delta: number,
+    userId: string
+  ): Promise<number> {
+    const r = this.ref(farmId, shedId, date);
     const snap = await getDoc(r);
 
     if (!snap.exists()) {
+      const meta = this.deriveSectorMeta(shedId);
       const baseCounts = { ...EMPTY_COUNTS, [key]: Math.max(0, delta) };
-      await setDoc(r, { counts: baseCounts, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+
+      const payload: EggRecord = {
+        date,
+        farmId,
+        shedId,
+        sectorId: meta.sectorId ?? undefined,
+        shedLabel: meta.label,
+        counts: baseCounts,
+        userId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(r, payload);
       return baseCounts[key];
     }
 
     const current = (snap.data()?.['counts']?.[key] ?? 0) as number;
     const next = Math.max(0, current + delta);
-    await updateDoc(r, { [`counts.${key}`]: next, updatedAt: serverTimestamp() });
+
+    await updateDoc(r, {
+      [`counts.${key}`]: next,
+      updatedAt: serverTimestamp()
+    });
+
     return next;
   }
 
-  // 🔹 Listar registros por rango (para reportes)
-  async listByDateRange(farmId: string, shedId: string, startDate: string, endDate: string, userId?: string): Promise<EggRecord[]> {
+  // 🔹 Listar registros por rango (opcional, para reportes)
+  async listByDateRange(
+    farmId: string,
+    shedId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<EggRecord[]> {
     const db = getFirestore();
-    const col = collection(db, `farms/${farmId}/sheds/${shedId}/eggRecords`);
+    const colRef = collection(db, `farms/${farmId}/sheds/${shedId}/eggRecords`);
 
-    const q = query(col, orderBy('date', 'asc'));
-    const snap = await getDocs(q);
+    const qRef = query(
+      colRef,
+      where('date', '>=', startDate),
+      where('date', '<=', endDate),
+      orderBy('date', 'asc')
+    );
 
-    const results: EggRecord[] = [];
-
-    for (const docDay of snap.docs) {
-      const usersCol = collection(db, `${docDay.ref.path}/users`);
-      const userQuery = userId
-        ? query(usersCol, where('userId', '==', userId))
-        : query(usersCol);
-      const userSnap = await getDocs(userQuery);
-      userSnap.forEach(d => results.push(d.data() as EggRecord));
-    }
-
-    return results.filter(r => r.date >= startDate && r.date <= endDate);
+    const snap = await getDocs(qRef);
+    return snap.docs.map(d => d.data() as EggRecord);
   }
 
-  // 🔹 Últimos N días
-  async listLastNDays(farmId: string, shedId: string, endDate: string, days: number = 7, userId?: string): Promise<EggRecord[]> {
+  // 🔹 Últimos N días (endDate inclusive)
+  async listLastNDays(
+    farmId: string,
+    shedId: string,
+    endDate: string,
+    days: number = 7
+  ): Promise<EggRecord[]> {
     const start = this.addDays(endDate, -(days - 1));
-    return this.listByDateRange(farmId, shedId, start, endDate, userId);
+    return this.listByDateRange(farmId, shedId, start, endDate);
   }
 
   private addDays(dateYmd: string, offset: number): string {

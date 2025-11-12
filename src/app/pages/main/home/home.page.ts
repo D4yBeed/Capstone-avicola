@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getFirestore, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 
 import { Eggs, EggKey } from 'src/app/services/eggs';
 import { Firebase } from 'src/app/services/firebase';
@@ -19,7 +18,7 @@ type Shed = { id: string; name: string; sector: number; letter: 'A' | 'B' };
 export class HomePage implements OnInit {
   form!: FormGroup;
   user!: User;
-  userId: string | null = null;
+  userId: string | null = null;  // UID de Firebase (y también de tu User)
   ready = false;
 
   selectedDate = ''; // YYYY-MM-DD
@@ -127,61 +126,79 @@ export class HomePage implements OnInit {
     this.totalDia = Object.values(this.counts).reduce((a, b) => a + b, 0);
   }
 
+  // 🔹 Cargar registro del día (sin crear automático)
   private async loadRecord() {
-  try {
-    if (!this.userId) return;
-    const date = this.isoToYmd(this.form.value.date);
-    const { farmId, shedId } = this.form.value;
-    if (!farmId || !shedId) return;
+    try {
+      if (!this.userId) return;
+      const date = this.isoToYmd(this.form.value.date);
+      const { farmId, shedId } = this.form.value;
+      if (!farmId || !shedId) return;
 
-    this.selectedDate = date;
+      this.selectedDate = date;
 
-    // Obtener el registro del día
-   const rec = await this.eggsSvc.getDay(farmId, shedId, date, this.userId);
+      // 👀 Obtener registro por galpón + día
+      const rec = await this.eggsSvc.getDay(farmId, shedId, date);
 
+      // Si ya existe un registro en este galpón y el usuario es pollero, bloquear edición
+      if (rec && this.user.role === 'pollero') {
+        this.counts = { ...(rec.counts as any) };
+        this.form.patchValue({ notes: rec.notes ?? '' }, { emitEvent: false });
+        this.calcTotal();
+        this.ready = true;
 
-    // 🔒 Si ya existe un registro hecho por el pollero, bloquear edición
-    if (rec && rec.userId === this.userId && this.user.role === 'pollero') {
-      this.counts = { ...(rec.counts as any) };
-      this.form.patchValue({ notes: rec.notes ?? '' }, { emitEvent: false });
+        this.form.disable();
+
+        this.utilsSvc.presentToast({
+          message: 'Ya existe un registro para este galpón en este día. No puedes modificarlo.',
+          color: 'warning',
+          duration: 2500,
+          position: 'middle',
+          icon: 'alert-circle-outline'
+        });
+        return;
+      }
+
+      // Si no hay registro previo en este galpón+día, trabajar en blanco
+      if (!rec) {
+        this.counts = {
+          incubables_nido: 0, incubables_piso: 0,
+          sucios_nido: 0, sucios_piso: 0,
+          trizados_nido: 0, trizados_piso: 0,
+          dobles_nido: 0, dobles_piso: 0,
+        };
+        this.form.patchValue({ notes: '' }, { emitEvent: false });
+      } else {
+        // Para otros roles (supervisor/encargado) podrías permitir edición si quisieras
+        this.counts = { ...(rec.counts as any) };
+        this.form.patchValue({ notes: rec.notes ?? '' }, { emitEvent: false });
+      }
+
+      this.calcTotal();
       this.ready = true;
-
-      // ⚠️ Deshabilitar botón Guardar (ya hizo su registro)
-      this.form.disable();
-
+    } catch (e) {
+      this.ready = false;
       this.utilsSvc.presentToast({
-        message: 'Ya realizaste tu registro para este día. No puedes modificarlo.',
-        color: 'warning',
-        duration: 2500,
-        position: 'middle',
-        icon: 'alert-circle-outline'
+        message: 'No se pudo cargar el registro',
+        color: 'danger',
+        duration: 1800
       });
-      return;
+      console.error(e);
     }
-
-    // Si no hay registro previo, crear uno nuevo
-    const record = await this.eggsSvc.getOrCreate(farmId, shedId, date, this.userId);
-    this.counts = { ...(record.counts as any) };
-    this.form.patchValue({ notes: record.notes ?? '' }, { emitEvent: false });
-
-    this.calcTotal();
-    this.ready = true;
-  } catch (e) {
-    this.ready = false;
-    this.utilsSvc.presentToast({
-      message: 'No se pudo cargar el registro',
-      color: 'danger',
-      duration: 1800
-    });
-    console.error(e);
   }
-}
-
 
   async inc(key: EggKey) {
     try {
+      if (this.form.disabled) return;
+
       const date = this.isoToYmd(this.form.value.date);
-      const next = await this.eggsSvc.increment(this.form.value.farmId, this.form.value.shedId, date, key, 1, this.userId!);
+      const next = await this.eggsSvc.increment(
+        this.form.value.farmId,
+        this.form.value.shedId,
+        date,
+        key,
+        1,
+        this.userId!
+      );
       this.counts[key] = next;
       this.calcTotal();
     } catch (e) {
@@ -192,9 +209,18 @@ export class HomePage implements OnInit {
 
   async dec(key: EggKey) {
     try {
+      if (this.form.disabled) return;
       if ((this.counts[key] || 0) === 0) return;
+
       const date = this.isoToYmd(this.form.value.date);
-      const next = await this.eggsSvc.increment(this.form.value.farmId, this.form.value.shedId, date, key, -1, this.userId!);
+      const next = await this.eggsSvc.increment(
+        this.form.value.farmId,
+        this.form.value.shedId,
+        date,
+        key,
+        -1,
+        this.userId!
+      );
       this.counts[key] = next;
       this.calcTotal();
     } catch (e) {
@@ -204,58 +230,59 @@ export class HomePage implements OnInit {
   }
 
   async onSave() {
-  try {
-    const date = this.isoToYmd(this.form.value.date);
-    const { farmId, shedId, notes } = this.form.value;
+    try {
+      const date = this.isoToYmd(this.form.value.date);
+      const { farmId, shedId, notes } = this.form.value;
 
-    if (!this.userId) {
+      if (!this.userId) {
+        this.utilsSvc.presentToast({
+          message: 'Usuario no identificado',
+          color: 'danger',
+          duration: 2000,
+          position: 'middle'
+        });
+        return;
+      }
+
+      // Ver si ya existe algún registro para este galpón y día
+      const existing = await this.eggsSvc.getDay(farmId, shedId, date);
+
+      // Crear o actualizar SIEMPRE (en este galpón + día)
+      await this.eggsSvc.upsertCounts(
+        farmId,
+        shedId,
+        date,
+        this.counts,
+        notes,
+        this.userId
+      );
+
       this.utilsSvc.presentToast({
-        message: 'Usuario no identificado',
+        message: existing
+          ? 'Registro actualizado correctamente'
+          : 'Registro guardado exitosamente',
+        color: 'success',
+        duration: 1800,
+        position: 'middle',
+        icon: 'checkmark-circle-outline'
+    });
+
+      // Si es pollero, bloquear edición después de guardar su registro
+      if (this.user.role === 'pollero') {
+        this.form.disable();
+      }
+
+    } catch (error) {
+      console.error(error);
+      this.utilsSvc.presentToast({
+        message: 'No se pudo guardar el registro',
         color: 'danger',
         duration: 2000,
-        position: 'middle'
-      });
-      return;
-    }
-
-    // 🔎 Verificar si ya existe un registro de este usuario en este galpón hoy
-    const existing = await this.eggsSvc.getDay(farmId, shedId, date, this.userId);
-    if (existing) {
-      this.utilsSvc.presentToast({
-        message: 'Ya realizaste un registro hoy en tu galpón.',
-        color: 'warning',
-        duration: 2500,
         position: 'middle',
         icon: 'alert-circle-outline'
       });
-      return;
     }
-
-    // ✅ Guardar nuevo registro
-    await this.eggsSvc.upsertCounts(farmId, shedId, date, this.counts, notes, this.userId);
-
-    this.utilsSvc.presentToast({
-      message: 'Registro guardado exitosamente',
-      color: 'success',
-      duration: 1800,
-      position: 'middle',
-      icon: 'checkmark-circle-outline'
-    });
-
-  } catch (error) {
-    console.error(error);
-    this.utilsSvc.presentToast({
-      message: 'No se pudo guardar el registro',
-      color: 'danger',
-      duration: 2000,
-      position: 'middle',
-      icon: 'alert-circle-outline'
-    });
   }
-}
-
-
-
 
   signOut() {
     this.firebaseSvc.signOut();
