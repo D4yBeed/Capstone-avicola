@@ -28,16 +28,21 @@ export class AuthPage implements OnInit {
       await loading.present();
 
       try {
-        // 🔹 Autenticación con Firebase Auth
+        // 1. Autenticación con Firebase Auth (Email y contraseña)
         const res = await this.firebaseSvc.signIn(this.form.value as User);
 
-        // 🔹 Obtener información completa del usuario desde Firestore
+        // 2. ✅ ESTA ES LA LÍNEA IMPORTANTE
+        // Obtiene el rol y el nombre desde la base de datos usando el UID
         await this.getUserInfo(res.user.uid);
 
       } catch (error: any) {
         console.error(error);
+        
+        // Usamos la función para mostrar errores claros en español
+        const cleanMessage = this.mapFirebaseError(error.code);
+
         this.utilsSvc.presentToast({
-          message: error.message || 'Error al iniciar sesión',
+          message: cleanMessage,
           duration: 2500,
           color: 'danger',
           position: 'middle',
@@ -49,36 +54,33 @@ export class AuthPage implements OnInit {
     }
   }
 
+  // 🔹 Función para obtener datos del usuario (Rol, Nombre, Galpón)
   async getUserInfo(uid: string) {
-    const loading = await this.utilsSvc.loading();
-    await loading.present();
-
     try {
       const path = `users/${uid}`;
       const user = (await this.firebaseSvc.getDocument(path)) as User;
 
       if (user) {
-        // 🧹 Limpiar datos antiguos y guardar el nuevo usuario
-        localStorage.removeItem('user');
+        // Guardar usuario en LocalStorage para usarlo en toda la app
         this.utilsSvc.saveInLocalStorage('user', user);
 
-        // 👤 Redirigir al home
+        // Redirigir al Home
         this.utilsSvc.routerLink('/main/home');
         this.form.reset();
 
-        // 👋 Mensaje de bienvenida
         this.utilsSvc.presentToast({
-          message: `Bienvenido ${user.name || user.email}!`,
+          message: `¡Bienvenido ${user.name || user.email}!`,
           duration: 2000,
-          color: 'secondary',
+          color: 'success', // Cambié a success para que se vea verde/positivo
           position: 'middle',
           icon: 'person-circle-outline'
         });
       } else {
+        // Si el usuario existe en Auth pero no en la BD (caso raro)
         this.utilsSvc.presentToast({
-          message: 'No se encontraron datos del usuario en la base de datos.',
+          message: 'Error: No se encontraron los datos del usuario.',
           duration: 2500,
-          color: 'danger',
+          color: 'warning',
           position: 'middle',
           icon: 'alert-circle-outline'
         });
@@ -92,8 +94,26 @@ export class AuthPage implements OnInit {
         position: 'middle',
         icon: 'alert-circle-outline'
       });
-    } finally {
-      loading.dismiss();
+    }
+  }
+
+  // 🔹 Traductor de errores de Firebase
+  private mapFirebaseError(code: string): string {
+    switch (code) {
+      case 'auth/invalid-email':
+        return 'El correo electrónico no es válido.';
+      case 'auth/user-not-found':
+      case 'auth/invalid-credential':
+        return 'Usuario no encontrado o contraseña incorrecta.';
+      case 'auth/wrong-password':
+        return 'La contraseña es incorrecta.';
+      case 'auth/too-many-requests':
+        return 'Demasiados intentos fallidos. Intente más tarde.';
+      case 'auth/network-request-failed':
+        return 'Error de conexión. Revise su internet.';
+      default:
+        return 'Error al iniciar sesión. Verifique sus datos.';
     }
   }
 }
+

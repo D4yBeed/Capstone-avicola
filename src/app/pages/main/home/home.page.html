@@ -1,127 +1,58 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="light">
-    <ion-title color="danger">Registro Diario</ion-title>
-    <ion-buttons slot="end">
-      <ion-button routerLink="/main/profile">
-        <ion-icon name="person-circle-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <ion-title color="danger">Inicio</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="home-content">
-
-  <form [formGroup]="form" (ngSubmit)="onSave()" class="home-form">
-
-    <!-- Fecha -->
-    <div class="date-box">
-      <ion-icon name="calendar-outline" class="date-icon"></ion-icon>
-      <span>{{ selectedDate }}</span>
+  
+  <div class="menu-container">
+    
+    <div class="welcome-section">
+      <h5>Bienvenido</h5>
+      <h2>{{ user?.name || user?.email }}</h2>
+      <p class="role-badge">{{ user?.role | titlecase }}</p>
     </div>
 
-    <!-- ⚠️ Aviso si el formulario está en solo lectura -->
-    <div *ngIf="form?.disabled" class="readonly-banner">
-      <ion-icon name="lock-closed-outline"></ion-icon>
-      <span>Registro en modo solo lectura. No puedes modificar este día.</span>
+    <h3 class="menu-title">Seleccione una opción</h3>
+
+    <div class="options-grid">
+      
+      <div *ngIf="isPollero()" class="menu-item" (click)="navigateTo('/main/registro-huevos')">
+        <div class="circle-icon image-icon">
+          <img src="assets/img/huevos.png" alt="Huevos">
+        </div>
+        <label>Registro Huevos</label>
+      </div>
+
+      <div *ngIf="isStaff()" class="menu-item" (click)="navigateTo('/main/admin-users')">
+        <div class="circle-icon">
+          <ion-icon name="people" color="danger"></ion-icon>
+        </div>
+        <label>Usuarios</label>
+      </div>
+
+      <div *ngIf="isStaff()" class="menu-item" (click)="navigateTo('/main/history')">
+        <div class="circle-icon">
+          <ion-icon name="calendar" color="danger"></ion-icon>
+        </div>
+        <label>Historial</label>
+      </div>
+
+      <div class="menu-item" (click)="navigateTo('/main/reports')">
+        <div class="circle-icon image-icon">
+          <img src="assets/img/reportes.png" alt="Reportes">
+        </div>
+        <label>Reportes</label>
+      </div>
+
+      <div class="menu-item" (click)="navigateTo('/main/profile')">
+        <div class="circle-icon">
+          <ion-icon name="person" color="danger"></ion-icon>
+        </div>
+        <label>Mi Perfil</label>
+      </div>
+
     </div>
-
-    <!-- Selectores -->
-    <ion-card class="selectors-card">
-      <ion-card-content>
-        <ion-item lines="full">
-          <ion-label position="stacked">Granja</ion-label>
-          <ion-select formControlName="farmId">
-            <ion-select-option *ngFor="let f of farms" [value]="f.id">
-              {{ f.name }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item lines="full">
-          <ion-label position="stacked">Sector</ion-label>
-          <ion-select formControlName="sectorId">
-            <ion-select-option *ngFor="let s of sectors" [value]="s.id">
-              {{ s.name }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item lines="none">
-          <ion-label position="stacked">Galpón</ion-label>
-          <ion-select formControlName="shedId">
-            <ion-select-option *ngFor="let s of sheds" [value]="s.id">
-              {{ s.name }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Conteo -->
-    <ion-card class="count-card" *ngIf="ready">
-      <ion-card-header>
-        <ion-card-title class="count-title">
-          Conteo por Calidad y Ubicación
-        </ion-card-title>
-      </ion-card-header>
-
-      <ion-card-content>
-        <div class="count-grid">
-          <div class="count-row" *ngFor="let c of categories">
-            <span class="label">{{ c.label }}</span>
-            <div class="controls">
-              <ion-button
-                size="small"
-                fill="solid"
-                color="light"
-                class="btn-minus"
-                (click)="dec(c.key)"
-                [disabled]="form?.disabled"
-              >
-                −
-              </ion-button>
-
-              <span class="count">{{ counts[c.key] || 0 }}</span>
-
-              <ion-button
-                size="small"
-                fill="solid"
-                color="danger"
-                class="btn-plus"
-                (click)="inc(c.key)"
-                [disabled]="form?.disabled"
-              >
-                +
-              </ion-button>
-            </div>
-          </div>
-        </div>
-
-        <ion-item lines="none" class="notes">
-          <ion-label position="stacked">Notas</ion-label>
-          <ion-textarea
-            formControlName="notes"
-            placeholder="Observaciones del día..."
-            autoGrow="true"
-          ></ion-textarea>
-        </ion-item>
-
-        <div class="total-box">
-          <span>Total diario:</span>
-          <strong>{{ totalDia }}</strong>
-        </div>
-
-        <ion-button
-          expand="block"
-          type="submit"
-          class="btn-save"
-          [disabled]="form?.disabled"
-        >
-          <ion-icon name="save-outline" slot="start"></ion-icon>
-          Guardar Registro
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
-  </form>
+  </div>
 </ion-content>
-

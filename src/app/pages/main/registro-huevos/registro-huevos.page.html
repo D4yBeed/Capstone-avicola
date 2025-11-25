@@ -1,0 +1,140 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/main/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title color="danger">Registro Diario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/main/profile">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="home-content">
+
+  <form [formGroup]="form" (ngSubmit)="onSave()" class="home-form">
+
+    <!-- Fecha -->
+    <div class="date-box">
+      <ion-icon name="calendar-outline" class="date-icon"></ion-icon>
+      <span>{{ selectedDate }}</span>
+    </div>
+
+    <!--  Aviso si el formulario está en solo lectura -->
+    <div *ngIf="form?.disabled" class="readonly-banner">
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      <span>Registro en modo solo lectura. No puedes modificar este día.</span>
+    </div>
+
+    <!-- Selectores -->
+    <ion-card class="selectors-card">
+      <ion-card-content>
+        <ion-item lines="full">
+          <ion-label position="stacked">Granja</ion-label>
+          <ion-select formControlName="farmId">
+            <ion-select-option *ngFor="let f of farms" [value]="f.id">
+              {{ f.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="stacked">Sector</ion-label>
+          <ion-select formControlName="sectorId">
+            <ion-select-option *ngFor="let s of sectors" [value]="s.id">
+              {{ s.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Galpón</ion-label>
+          <ion-select formControlName="shedId">
+            <ion-select-option *ngFor="let s of sheds" [value]="s.id">
+              {{ s.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Conteo -->
+    <ion-card class="count-card" *ngIf="ready">
+      <ion-card-header>
+        <ion-card-title class="count-title">
+          Conteo por Calidad y Ubicación
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="count-grid">
+          <div class="count-row" *ngFor="let c of categories">
+            <span class="label">{{ c.label }}</span>
+            <div class="controls">
+
+              <!-- Botón -1 -->
+              <ion-button
+                size="small"
+                fill="solid"
+                color="light"
+                class="btn-minus"
+                (click)="dec(c.key)"
+                [disabled]="form?.disabled"
+              >
+                −
+              </ion-button>
+
+              <!-- 🔢 Input numérico directo -->
+              <ion-input
+                type="number"
+                class="count-input"
+                [value]="counts[c.key] || 0"
+                [disabled]="form?.disabled"
+                inputmode="numeric"
+                (ionChange)="onCountChange(c.key, $event.detail.value)"
+              ></ion-input>
+
+              <!-- Botón +1 -->
+              <ion-button
+                size="small"
+                fill="solid"
+                color="danger"
+                class="btn-plus"
+                (click)="inc(c.key)"
+                [disabled]="form?.disabled"
+              >
+                +
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+        <ion-item lines="none" class="notes">
+          <ion-label position="stacked">Notas</ion-label>
+          <ion-textarea
+            formControlName="notes"
+            placeholder="Observaciones del día..."
+            autoGrow="true"
+          ></ion-textarea>
+        </ion-item>
+
+        <div class="total-box">
+          <span>Total diario:</span>
+          <strong>{{ totalDia }}</strong>
+        </div>
+
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-save"
+          [disabled]="form?.disabled"
+        >
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          Guardar Registro
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </form>
+</ion-content>
