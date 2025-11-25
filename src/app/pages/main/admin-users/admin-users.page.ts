@@ -35,17 +35,17 @@ export class AdminUsersPage implements OnInit {
 
   initForm() {
     this.form = this.fb.group({
-      name: ['', [Validators.required]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      // 🔹 Validaciones de contraseña mejoradas
+      password: ['', [
+        Validators.required, 
+        Validators.minLength(6), 
+        Validators.maxLength(20)
+      ]],
+      // 🔹 Rol obligatorio
       role: ['pollero', Validators.required],
       assignedShed: ['']
-    });
-
-    this.form.get('role')?.valueChanges.subscribe(role => {
-      if (role !== 'pollero') {
-        this.form.get('assignedShed')?.reset();
-      }
     });
   }
 
@@ -59,11 +59,12 @@ export class AdminUsersPage implements OnInit {
   }
 
   async createUser() {
+    // 🔹 Validación explícita antes de enviar
     if (this.form.invalid) {
       this.utilsSvc.presentToast({
-        message: 'Completa todos los campos requeridos',
+        message: 'Por favor corrija los errores en el formulario (verifique contraseña min 6 caracteres y campos vacíos).',
         color: 'warning',
-        duration: 2000,
+        duration: 2500,
         icon: 'alert-circle-outline'
       });
       return;
