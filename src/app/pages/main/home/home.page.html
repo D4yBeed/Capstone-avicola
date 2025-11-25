@@ -32,14 +32,14 @@
         <label>Usuarios</label>
       </div>
 
-      <div *ngIf="isStaff()" class="menu-item" (click)="navigateTo('/main/history')">
+      <div class="menu-item" (click)="navigateTo('/main/history')">
         <div class="circle-icon">
           <ion-icon name="calendar" color="danger"></ion-icon>
         </div>
         <label>Historial</label>
       </div>
 
-      <div class="menu-item" (click)="navigateTo('/main/reports')">
+      <div *ngIf="isStaff()" class="menu-item" (click)="navigateTo('/main/reports')">
         <div class="circle-icon image-icon">
           <img src="assets/img/reportes.png" alt="Reportes">
         </div>

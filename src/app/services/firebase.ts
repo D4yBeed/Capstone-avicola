@@ -4,7 +4,9 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  updateProfile, 
+  updatePassword 
 } from 'firebase/auth';
 import { User } from '../models/user.model';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
@@ -13,6 +15,7 @@ import {
   setDoc,
   doc,
   getDoc,
+  updateDoc,
   serverTimestamp
 } from '@angular/fire/firestore';
 import { Utils } from '../services/utils';
@@ -26,17 +29,17 @@ export class Firebase {
   firestore = inject(AngularFirestore);
   utilsSvc = inject(Utils);
 
-  // 🔹 Obtener instancia de autenticación
+  //  Obtener instancia de autenticación
   getAuth() {
     return getAuth();
   }
 
-  // 🔹 Iniciar sesión
+  //  Iniciar sesión
   signIn(user: User) {
     return signInWithEmailAndPassword(getAuth(), user.email, user.password);
   }
 
-  // 🔹 Cerrar sesión
+  //  Cerrar sesión
   signOut() {
     getAuth().signOut();
     localStorage.removeItem('user');
@@ -85,7 +88,33 @@ export class Firebase {
 
     return newUser;
   }
+  //  Actualizar Nombre (Auth + Firestore)
+  async updateUserProfile(name: string) {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      // 1. Actualizar en Auth
+      await updateProfile(user, { displayName: name });
+      // 2. Actualizar en Firestore
+      const db = getFirestore();
+      await updateDoc(doc(db, 'users', user.uid), { name });
+      return true;
+    }
+    return false;
+  }
+
+  //  Actualizar Contraseña
+  async updateUserPassword(newPass: string) {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      await updatePassword(user, newPass);
+      return true;
+    }
+    return false;
+  }
 }
+
 
 
 

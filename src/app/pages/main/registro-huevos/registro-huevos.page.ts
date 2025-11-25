@@ -67,29 +67,49 @@ export class RegistroHuevosPage implements OnInit {
     fb = inject(FormBuilder);
   
     ngOnInit(): void {
-      this.user = this.utilsSvc.getFromLocalStorage('user');
-  
-      const todayISO = this.todayLocalISO();
-      this.selectedDate = todayISO.slice(0, 10);
-  
-      this.sheds = this.filterShedsByRole();
-      const defaultSector = this.sheds[0]?.sector || 1;
-  
-      this.form = this.fb.group({
-        date: [todayISO],
-        farmId: [this.farms[0]?.id || ''],
-        sectorId: [defaultSector],
-        shedId: [this.sheds[0]?.id || ''],
-        notes: ['']
-      });
-  
-      if (this.user.role !== 'pollero') {
-        this.form.get('sectorId')!.valueChanges.subscribe((sec: number) => {
-          this.sheds = this.allSheds.filter(s => s.sector === Number(sec));
-          this.form.patchValue({ shedId: this.sheds[0]?.id || '' }, { emitEvent: false });
-          this.loadRecord();
-        });
+    this.user = this.utilsSvc.getFromLocalStorage('user');
+
+    const todayISO = this.todayLocalISO();
+    this.selectedDate = todayISO.slice(0, 10);
+
+    // 1. Filtrar Galpones (ya lo tenías)
+    this.sheds = this.filterShedsByRole();
+    
+    // 🔹 2. NUEVO: Filtrar Sectores si es pollero
+    if (this.user.role === 'pollero' && this.user.assignedShed) {
+      // Extraemos el número del galpón (ej: "S3A" -> "3")
+      // Usamos una expresión regular para sacar solo los dígitos
+      const sectorNumString = this.user.assignedShed.replace(/\D/g, ''); 
+      const sectorNum = parseInt(sectorNumString, 10);
+
+      if (!isNaN(sectorNum)) {
+        // Sobrescribimos la lista de sectores para mostrar SOLO el asignado
+        this.sectors = [{ id: sectorNum, name: `Sector ${sectorNum}` }];
       }
+    }
+
+    // Seleccionar sector por defecto (el primero de la lista filtrada o completa)
+    const defaultSector = this.sectors.length > 0 ? this.sectors[0].id : 1;
+
+    this.form = this.fb.group({
+      date: [todayISO],
+      farmId: [this.farms[0]?.id || ''],
+      sectorId: [defaultSector], // 🔹 Se pre-selecciona el sector único si es pollero
+      shedId: [this.sheds[0]?.id || ''],
+      notes: ['']
+    });
+
+    // Lógica de cambio de sector (Solo si NO es pollero, o si quieres que funcione igual)
+    if (this.user.role !== 'pollero') {
+      this.form.get('sectorId')!.valueChanges.subscribe((sec: number) => {
+        this.sheds = this.allSheds.filter(s => s.sector === Number(sec));
+        this.form.patchValue({ shedId: this.sheds[0]?.id || '' }, { emitEvent: false });
+        this.loadRecord();
+      });
+    } else {
+        // Si es pollero, como solo hay un sector y galpón, cargamos directo
+        this.loadRecord(); 
+    }
   
       onAuthStateChanged(this.firebaseSvc.getAuth(), async (u) => {
         this.userId = u?.uid ?? null;
