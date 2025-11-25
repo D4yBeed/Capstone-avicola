@@ -154,12 +154,33 @@
   font-size: 1.1rem;
 }
 
+
 .btn-save {
-  --background: #c62828;
+  /* ANTES ESTABA ASÍ: --background: #c62828; (Esto es un rojo oscuro genérico) */
+  
+  /* CAMBIAR POR ESTO: */
+  --background: var(--ion-color-danger); /* Esto usa el rojo oficial de la app (#e30613) */
+  
+  /* Opcional: para que al presionar se vea un poco más oscuro pero en el mismo tono */
+  --background-activated: #c00511; 
+  
   color: white;
   --border-radius: 10px;
-  margin-top: 8px;
-  font-weight: 600;
+  margin-top: 25px; /* Un poco más de espacio arriba */
+  font-weight: 700;
+  font-size: 1.1rem;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
+  text-transform: none; /* Para que no sea todo mayúsculas si no quieres */
+  height: 50px; /* Un poco más alto para que sea fácil de tocar */
+  box-shadow: 0 4px 10px rgba(227, 6, 19, 0.25); /* Sombra roja suave */
+  ion-icon {
+    margin-right: 8px;
+    color: #ffffff !important;
+  }
+}
+
+/* Para cuando el botón está deshabilitado (si el formulario es inválido o se está enviando) */
+.btn-save:disabled {
+  opacity: 0.6;
+  --background: var(--ion-color-danger);
 }
