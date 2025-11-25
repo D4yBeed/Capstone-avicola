@@ -35,17 +35,33 @@ export class AdminUsersPage implements OnInit {
 
   initForm() {
     this.form = this.fb.group({
-      name: ['', [Validators.required]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      role: ['pollero', Validators.required],
-      assignedShed: ['']
+      // Contraseña con límites (mínimo 6, máximo 20)
+      password: ['', [
+        Validators.required, 
+        Validators.minLength(6), 
+        Validators.maxLength(20)
+      ]],
+      role: ['pollero', Validators.required], // Valor por defecto: pollero
+      // Inicialmente obligatorio porque el rol por defecto es 'pollero'
+      assignedShed: ['', Validators.required] 
     });
 
+    // 🔹 Lógica para activar/desactivar la obligatoriedad del galpón
     this.form.get('role')?.valueChanges.subscribe(role => {
-      if (role !== 'pollero') {
-        this.form.get('assignedShed')?.reset();
+      const shedControl = this.form.get('assignedShed');
+
+      if (role === 'pollero') {
+        // Si es pollero, el galpón es REQUERIDO
+        shedControl?.setValidators([Validators.required]);
+      } else {
+        // Si es otro rol, quitamos validadores y limpiamos el valor
+        shedControl?.clearValidators();
+        shedControl?.reset();
       }
+      // Actualizar el estado de validación del control
+      shedControl?.updateValueAndValidity();
     });
   }
 
@@ -61,9 +77,9 @@ export class AdminUsersPage implements OnInit {
   async createUser() {
     if (this.form.invalid) {
       this.utilsSvc.presentToast({
-        message: 'Completa todos los campos requeridos',
+        message: 'Por favor completa todos los campos obligatorios (si es pollero, debe tener galpón asignado)',
         color: 'warning',
-        duration: 2000,
+        duration: 2500,
         icon: 'alert-circle-outline'
       });
       return;
@@ -74,7 +90,8 @@ export class AdminUsersPage implements OnInit {
 
     try {
       const { name, email, password, role, assignedShed } = this.form.value;
-      const newUser = await this.firebaseSvc.createUserWithRole(
+      
+      await this.firebaseSvc.createUserWithRole(
         { name, email, password },
         role,
         assignedShed
@@ -87,6 +104,7 @@ export class AdminUsersPage implements OnInit {
         icon: 'checkmark-circle-outline'
       });
 
+      // Resetear formulario manteniendo 'pollero' por defecto
       this.form.reset({ role: 'pollero' });
       this.loadUsers();
 
@@ -103,6 +121,7 @@ export class AdminUsersPage implements OnInit {
     }
   }
 
+  // ... resto de funciones (loadUsers, updateRole, deleteUser) igual que antes ...
   async loadUsers() {
     const db = getFirestore();
     const snapshot = await getDocs(collection(db, 'users'));

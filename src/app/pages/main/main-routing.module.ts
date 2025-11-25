@@ -27,6 +27,10 @@ const routes: Routes = [
     path: 'admin-users',
     loadChildren: () => import('./admin-users/admin-users.module').then( m => m.AdminUsersPageModule)
   },
+  {
+    path: 'registro-huevos',
+    loadChildren: () => import('./registro-huevos/registro-huevos.module').then( m => m.RegistroHuevosPageModule)
+  },
 
  
 
