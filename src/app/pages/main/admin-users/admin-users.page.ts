@@ -139,24 +139,43 @@ export class AdminUsersPage implements OnInit {
     });
   }
 
+  // ... (código anterior)
+
   async deleteUser(userId: string) {
     const confirm = await this.utilsSvc.presentAlert({
       header: 'Eliminar usuario',
-      message: '¿Seguro que deseas eliminar este usuario?',
+      message: '¿Seguro que deseas eliminar este usuario? Perderá el acceso inmediatamente.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Eliminar',
           handler: async () => {
-            const db = getFirestore();
-            await deleteDoc(doc(db, 'users', userId));
-            this.loadUsers();
-            this.utilsSvc.presentToast({
-              message: 'Usuario eliminado correctamente',
-              color: 'danger',
-              duration: 2000,
-              icon: 'trash-outline'
-            });
+            const loading = await this.utilsSvc.loading('Eliminando...');
+            await loading.present();
+
+            try {
+              // Usamos el nuevo método del servicio
+              await this.firebaseSvc.deleteUserDocument(userId);
+              
+              // Actualizamos la lista visualmente
+              this.loadUsers(); 
+              
+              this.utilsSvc.presentToast({
+                message: 'Usuario eliminado correctamente.',
+                color: 'success',
+                duration: 2000,
+                icon: 'trash-outline'
+              });
+            } catch (e) {
+              console.error(e);
+              this.utilsSvc.presentToast({
+                message: 'Error al eliminar usuario',
+                color: 'danger',
+                duration: 2000
+              });
+            } finally {
+              loading.dismiss();
+            }
           }
         }
       ]
