@@ -1,13 +1,69 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>profile</ion-title>
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/home">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title color="danger" class="title">Perfil de Usuario</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">profile</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="profile-content">
+
+  <div class="profile-wrapper">
+
+    <div class="profile-card">
+      <!-- Avatar -->
+      <div class="avatar">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </div>
+
+      <!-- Información del usuario -->
+      <h2>{{ user?.name || 'Usuario' }}</h2>
+      <p>{{ user?.email }}</p>
+      <p class="role-label">
+        Rol: <strong>{{ user?.role | titlecase }}</strong>
+      </p>
+
+      <!-- Galpón asignado (solo polleros) -->
+      <p *ngIf="user?.role === 'pollero' && user?.assignedShed" class="shed-label">
+        🏠 Galpón asignado: <strong>{{ user.assignedShed }}</strong>
+      </p>
+
+      <div class="buttons-wrapper">
+
+        <!-- 📜 Historial (todos los roles) -->
+        <ion-button expand="block" fill="outline" color="danger" routerLink="/main/history" class="btn-history">
+          <ion-icon name="time-outline" slot="start"></ion-icon>
+          Ver historial de registros
+        </ion-button>
+
+        <!-- 📊 Supervisores y encargados -->
+        <ion-button *ngIf="user?.role === 'supervisor' || user?.role === 'encargado'" expand="block" color="danger"
+          class="btn-report" routerLink="/main/reports">
+          <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+          Ver reportes de calidad
+        </ion-button>
+
+        <!-- 👥 Solo supervisores -->
+        <ion-button *ngIf="user?.role === 'supervisor'" expand="block" color="danger" routerLink="/main/admin-users"
+          class="btn-admin">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          Administrar usuarios
+        </ion-button>
+
+      </div>
+
+      <!-- 🚪 Cerrar sesión -->
+      <ion-button expand="block" color="danger" class="btn-logout" (click)="signOut()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar sesión
+      </ion-button>
+
+
+    </div>
+
+  </div>
+
 </ion-content>
