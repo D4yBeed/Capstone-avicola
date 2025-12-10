@@ -61,6 +61,28 @@
   flex-direction: column;
   align-items: center;
   cursor: pointer;
+<<<<<<< HEAD
+  transition: transform 0.2s ease;
+}
+
+.opcion:hover {
+  transform: scale(1.05);
+}
+
+.opcion img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.opcion p {
+  margin-top: 10px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+=======
   transition: transform 0.2s;
 
   &:active {
@@ -103,3 +125,4 @@
     }
   }
 }
+>>>>>>> 26033d877969fef4942bfc8b07c8feef52201b83

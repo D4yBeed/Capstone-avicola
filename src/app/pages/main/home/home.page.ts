@@ -10,6 +10,10 @@ import { User } from 'src/app/models/user.model';
   standalone: false
 })
 export class HomePage implements OnInit {
+  form!: FormGroup;
+  user!: User;
+  userId: string | null = null;
+  ready = false;
 
   utilsSvc = inject(Utils);
   firebaseSvc = inject(Firebase); // Inyectamos el servicio
