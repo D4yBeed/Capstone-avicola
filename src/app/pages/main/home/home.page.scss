@@ -61,7 +61,6 @@
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-<<<<<<< HEAD
   transition: transform 0.2s ease;
 }
 
@@ -82,8 +81,7 @@
   font-size: 1.1em;
   font-weight: 500;
 }
-=======
-  transition: transform 0.2s;
+
 
   &:active {
     transform: scale(0.95);
@@ -96,7 +94,7 @@
     color: #333;
     text-align: center;
   }
-}
+
 
 /* Círculos */
 .circle-icon {
@@ -125,4 +123,3 @@
     }
   }
 }
->>>>>>> 26033d877969fef4942bfc8b07c8feef52201b83
