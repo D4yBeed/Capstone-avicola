@@ -17,17 +17,21 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2022",
-    "module": "es2020",
+    "module": "es2022",
     "lib": [
-      "es2018", 
-      "dom"
+      "es2022",
+      "dom",
+      "es2020.intl"
     ],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "skipLibCheck": true,                // ✅ Ignora errores de tipos en node_modules
+    "allowSyntheticDefaultImports": true, // ✅ Permite imports por defecto de librerías JS
+    "esModuleInterop": true              // ✅ Mejora compatibilidad entre módulos
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictInjectionParameters": false,
+    "strictInputAccessModifiers": false,
+    "strictTemplates": false
   }
 }

@@ -1,32 +1,60 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Bienvenido Diego Santis</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="light">
+    <ion-title color="danger">Inicio</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-
-  <h2 class="titulo">Seleccione una opción</h2>
-
-  <div class="opciones-container">
-<!-- (click)="irA('registro-huevos') -->
-    <div class="opcion" >
-      <img src="assets/img/huevos.png" alt="Huevos" />
-      <p>Huevos</p>
-    </div>
-<!-- (click)="irA('registro-gallinas') -->
-    <div class="opcion" >
-      <img src="assets/img/gallinas.png" alt="Gallinas" />
-      <p>Gallinas</p>
+<ion-content class="home-content">
+  <!-- holaa -->
+  <div class="menu-container">
+    
+    <div class="welcome-section">
+      <h5>Bienvenido</h5>
+      <h2>{{ user?.name || user?.email }}</h2>
+      <p class="role-badge">{{ user?.role | titlecase }}</p>
     </div>
 
-    <div class="opcion" >
-      <img src="assets/img/reportes.png" alt="Reportes" />
-      <p>Reportes</p>
+    <h3 class="menu-title">Seleccione una opción</h3>
+
+    <div class="options-grid">
+      
+      <div *ngIf="isPollero()" class="menu-item" (click)="navigateTo('/main/registro-huevos')">
+        <div class="circle-icon image-icon">
+          <img src="assets/img/huevos.png" alt="Huevos">
+        </div>
+        <label>Registro Huevos</label>
+      </div>
+
+      <div *ngIf="isStaff()" class="menu-item" (click)="navigateTo('/main/admin-users')">
+        <div class="circle-icon">
+          <ion-icon name="people" color="danger"></ion-icon>
+        </div>
+        <label>Usuarios</label>
+      </div>
+
+      <div class="menu-item" (click)="navigateTo('/main/history')">
+        <div class="circle-icon">
+          <ion-icon name="calendar" color="danger"></ion-icon>
+        </div>
+        <label>Historial</label>
+      </div>
+
+      <div *ngIf="isStaff()" class="menu-item" (click)="navigateTo('/main/reports')">
+        <div class="circle-icon image-icon">
+          <img src="assets/img/reportes.png" alt="Reportes">
+        </div>
+        <label>Reportes</label>
+      </div>
+
+      <div class="menu-item" (click)="navigateTo('/main/profile')">
+        <div class="circle-icon">
+          <ion-icon name="person" color="danger"></ion-icon>
+        </div>
+        <label>Mi Perfil</label>
+      </div>
+
     </div>
-<!-- (click)="irA('reportes') -->
   </div>
-
 </ion-content>
 
 <!-- <ion-content [fullscreen]="true">

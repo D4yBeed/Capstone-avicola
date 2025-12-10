@@ -1,0 +1,95 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/home">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title color="danger">Historial de Registros</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="history-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="loadRecords($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar"></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loader -->
+  <ion-spinner *ngIf="loading" class="spinner-center" color="danger"></ion-spinner>
+
+  <!-- Sin registros -->
+  <div *ngIf="!loading && records.length === 0" class="no-data">
+    <ion-icon name="document-outline" size="large"></ion-icon>
+    <p>No hay registros en los últimos 7 días</p>
+  </div>
+
+  <!-- Lista de registros -->
+  <ion-list *ngIf="!loading && records.length > 0">
+    <ion-card *ngFor="let rec of records" class="record-card">
+      <ion-card-header>
+        <ion-card-subtitle>{{ formatDate(rec.date) }}</ion-card-subtitle>
+        <ion-card-title>{{ rec.shedLabel || rec.shedId }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="info-row">
+          <ion-icon name="egg-outline" color="danger"></ion-icon>
+          <span><strong>Total:</strong> {{ total(rec) }}</span>
+        </div>
+
+        <div *ngIf="rec.notes" class="notes-box">
+          <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+          <p>{{ rec.notes }}</p>
+        </div>
+
+        <div class="meta">
+          <small>Registrado por: <strong>{{ rec.userId }}</strong></small>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+</ion-content>
+
+
+
+
+
+<!-- <ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/profile">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title color="danger">Historial de Registros</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="history-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="loadRecords(); $event.target.complete()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="loading-box">
+    <ion-spinner color="danger"></ion-spinner>
+    <p>Cargando historial...</p>
+  </div>
+
+  <div *ngIf="!loading && records.length === 0" class="empty">
+    <ion-icon name="archive-outline" color="medium"></ion-icon>
+    <p>No hay registros en los últimos 7 días.</p>
+  </div>
+
+  <ion-list *ngIf="!loading && records.length > 0" lines="full">
+    <ion-item *ngFor="let record of records">
+      <ion-label>
+        <h2>{{ record.shedLabel }}</h2>
+        <p>{{ formatDate(record.date) }}</p>
+        <p>Total: <strong>{{ total(record) }}</strong></p>
+        <p *ngIf="record.notes">📝 {{ record.notes }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content> -->

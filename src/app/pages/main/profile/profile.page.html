@@ -1,13 +1,59 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>profile</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/home">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title color="danger" class="title">Mi Perfil</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">profile</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="profile-content">
+  
+  <div class="top-header-decoration"></div>
+
+  <div class="profile-wrapper">
+
+    <div class="profile-card">
+      
+      <div class="avatar-container">
+        <ion-icon name="person" color="danger"></ion-icon>
+      </div>
+
+      <h2>{{ user?.name || 'Usuario' }}</h2>
+      <p class="email-text">{{ user?.email }}</p>
+      
+      <div class="role-badge">
+        {{ user?.role | uppercase }}
+      </div>
+
+      <div *ngIf="user?.role === 'pollero' && user?.assignedShed" class="shed-info">
+        <ion-icon name="home-outline" color="danger"></ion-icon> 
+        <span>Galpón: <strong>{{ user.assignedShed }}</strong></span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="actions-wrapper">
+        <ion-button expand="block" fill="outline" class="action-btn" (click)="editName()">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          Editar Nombre
+        </ion-button>
+
+        <ion-button expand="block" fill="outline" class="action-btn" (click)="changePassword()">
+          <ion-icon name="key-outline" slot="start"></ion-icon>
+          Cambiar Contraseña
+        </ion-button>
+      </div>
+
+      <ion-button expand="block" color="danger" class="btn-logout" (click)="signOut()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar Sesión
+      </ion-button>
+
+    </div>
+
+  </div>
+
 </ion-content>

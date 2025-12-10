@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/main/home">
+        <ion-icon name="arrow-back-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>  
+    <ion-title color="danger">Reporte de Calidad</ion-title>
+
+    <!-- Botón para cambiar el tipo de gráfico -->
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleChartType()">
+        <ion-icon [name]="chartType === 'bar' ? 'pie-chart-outline' : 'bar-chart-outline'" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Selector de galpón -->
+  <ion-item lines="none">
+    <ion-label position="stacked">Seleccionar Sector / Galpón</ion-label>
+    <ion-select [(ngModel)]="selectedShed" (ionChange)="onShedChange()" interface="popover" color="danger">
+      <ion-select-option *ngFor="let shed of sheds" [value]="shed.id">{{ shed.label }}</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Resumen -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Resumen últimos 7 días</ion-card-title>
+      <ion-card-subtitle>Actualizado al {{ today }}</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let key of (totals | keyvalue)">
+          <ion-label>{{ key.key.replace('_', ' ') | titlecase }}</ion-label>
+          <ion-badge color="danger">{{ key.value }}</ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Gráfico -->
+  <div class="chart-container" *ngIf="records.length > 0">
+    <canvas id="eggsChart"></canvas>
+  </div>
+
+  <ion-text *ngIf="records.length === 0" color="medium">
+    <p class="ion-text-center">No hay registros disponibles en los últimos 7 días.</p>
+  </ion-text>
+
+</ion-content>

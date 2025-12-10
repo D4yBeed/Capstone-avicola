@@ -1,50 +1,72 @@
-import { inject, Injectable } from '@angular/core';
-import { LoadingController, ToastController, ToastOptions } from '@ionic/angular';
+import { Injectable } from '@angular/core';
+import { AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class Utils {
 
-  loadingCtrl = inject(LoadingController)
-  toastCtrl = inject(ToastController)
-  router = inject(Router)
+  constructor(
+    private alertCtrl: AlertController,
+    private toastCtrl: ToastController,
+    private loadingCtrl: LoadingController,
+    private router: Router
+  ) {}
 
-  // loading
-
-
-  loading() {
-    return this.loadingCtrl.create({ spinner: 'crescent' })
+  //  Crear alertas reutilizables
+  async presentAlert(options: {
+    header?: string;
+    message?: string;
+    buttons?: any[];
+  }) {
+    const alert = await this.alertCtrl.create({
+      header: options.header,
+      message: options.message,
+      buttons: options.buttons || ['OK']
+    });
+    return alert; // 👈 devolvemos el alert (no void)
   }
 
-  // toast
-
-  async presentToast(opts?: ToastOptions) {
-    const toast = await this.toastCtrl.create(opts);
+  // Crear toasts reutilizables
+  async presentToast(options: {
+    message: string;
+    color?: string;
+    duration?: number;
+    position?: 'top' | 'middle' | 'bottom';
+    icon?: string;
+  }) {
+    const toast = await this.toastCtrl.create({
+      message: options.message,
+      duration: options.duration || 2000,
+      color: options.color || 'primary',
+      position: options.position || 'bottom',
+      icon: options.icon
+    });
     toast.present();
   }
 
-  // enruta a cualquier pagina que se encuentre disponible
+  // Loading reutilizable
+  async loading(message: string = 'Cargando...') {
+    const loading = await this.loadingCtrl.create({
+      message,
+      spinner: 'crescent'
+    });
+    return loading;
+  }
 
+  // Navegación rápida
   routerLink(url: string) {
-    return this.router.navigateByUrl(url);
+    this.router.navigateByUrl(url);
   }
 
-
-
-  // guardar elementos localmente
-
-  saveInLocalStorage(key: string, value: any) {
-    return localStorage.setItem(key, JSON.stringify(value))
+  // LocalStorage Helpers
+  saveInLocalStorage(key: string, data: any) {
+    localStorage.setItem(key, JSON.stringify(data));
   }
-
-  // obtener desde el localStorage
 
   getFromLocalStorage(key: string) {
-    return JSON.parse(localStorage.getItem(key))
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
   }
-
-
 }
