@@ -54,32 +54,37 @@ export class AuthPage implements OnInit {
     }
   }
 
-  // 🔹 Función para obtener datos del usuario (Rol, Nombre, Galpón)
+
   async getUserInfo(uid: string) {
+    const loading = await this.utilsSvc.loading();
+    await loading.present();
+
     try {
       const path = `users/${uid}`;
       const user = (await this.firebaseSvc.getDocument(path)) as User;
 
       if (user) {
-        // Guardar usuario en LocalStorage para usarlo en toda la app
+        //  Usuario VÁLIDO: Guardar y entrar
         this.utilsSvc.saveInLocalStorage('user', user);
-
-        // Redirigir al Home
         this.utilsSvc.routerLink('/main/home');
         this.form.reset();
 
         this.utilsSvc.presentToast({
           message: `¡Bienvenido ${user.name || user.email}!`,
           duration: 2000,
-          color: 'success', // Cambié a success para que se vea verde/positivo
+          color: 'success',
           position: 'middle',
           icon: 'person-circle-outline'
         });
       } else {
-        // Si el usuario existe en Auth pero no en la BD (caso raro)
+        //  USUARIO ELIMINADO (Existe en Auth pero no en Firestore)
+        // 1. Cerrar la sesión inmediatamente
+        this.firebaseSvc.signOut(); 
+
+        // 2. Mostrar mensaje de error
         this.utilsSvc.presentToast({
-          message: 'Error: No se encontraron los datos del usuario.',
-          duration: 2500,
+          message: 'Su cuenta ha sido desactivada o eliminada.',
+          duration: 3000,
           color: 'warning',
           position: 'middle',
           icon: 'alert-circle-outline'
@@ -87,13 +92,18 @@ export class AuthPage implements OnInit {
       }
     } catch (error) {
       console.error(error);
+      // En caso de error de red, también cerramos por seguridad
+      this.firebaseSvc.signOut();
+      
       this.utilsSvc.presentToast({
-        message: 'Error al obtener información del usuario',
+        message: 'Error al verificar usuario.',
         duration: 2500,
         color: 'danger',
         position: 'middle',
         icon: 'alert-circle-outline'
       });
+    } finally {
+      loading.dismiss();
     }
   }
 

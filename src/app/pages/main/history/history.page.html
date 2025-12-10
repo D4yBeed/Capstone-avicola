@@ -44,7 +44,7 @@
         </div>
 
         <div class="meta">
-          <small>Registrado por: <strong>{{ rec.userId }}</strong></small>
+          <small>Registrado por: <strong>{{ userNames[rec.userId] || rec.userId }}</strong></small>
         </div>
       </ion-card-content>
     </ion-card>

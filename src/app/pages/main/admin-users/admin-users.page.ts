@@ -89,14 +89,22 @@ export class AdminUsersPage implements OnInit {
     await loading.present();
 
     try {
-      const { name, email, password, role, assignedShed } = this.form.value;
-      
-      await this.firebaseSvc.createUserWithRole(
-        { name, email, password },
-        role,
-        assignedShed
-      );
+    // En lugar de tomar el valor directo, creamos variables limpias
+    const formValue = this.form.value;
+    
+    // 1. Limpiamos el nombre de espacios accidentales al inicio/final
+    const name = formValue.name.trim(); 
+    
+    // 2. Extraemos el resto de datos normalmente
+    const { email, password, role, assignedShed } = formValue; 
 
+    // 3. Enviamos el 'name' limpio a la función
+    await this.firebaseSvc.createUserWithRole(
+      { name, email, password }, // Usamos la variable 'name' ya limpia
+      role,
+      assignedShed
+    );
+    
       this.utilsSvc.presentToast({
         message: `Usuario ${name} creado correctamente`,
         color: 'success',
@@ -139,24 +147,43 @@ export class AdminUsersPage implements OnInit {
     });
   }
 
+  // ... (código anterior)
+
   async deleteUser(userId: string) {
     const confirm = await this.utilsSvc.presentAlert({
       header: 'Eliminar usuario',
-      message: '¿Seguro que deseas eliminar este usuario?',
+      message: '¿Seguro que deseas eliminar este usuario? Perderá el acceso inmediatamente.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Eliminar',
           handler: async () => {
-            const db = getFirestore();
-            await deleteDoc(doc(db, 'users', userId));
-            this.loadUsers();
-            this.utilsSvc.presentToast({
-              message: 'Usuario eliminado correctamente',
-              color: 'danger',
-              duration: 2000,
-              icon: 'trash-outline'
-            });
+            const loading = await this.utilsSvc.loading('Eliminando...');
+            await loading.present();
+
+            try {
+              // Usamos el nuevo método del servicio
+              await this.firebaseSvc.deleteUserDocument(userId);
+              
+              // Actualizamos la lista visualmente
+              this.loadUsers(); 
+              
+              this.utilsSvc.presentToast({
+                message: 'Usuario eliminado correctamente.',
+                color: 'success',
+                duration: 2000,
+                icon: 'trash-outline'
+              });
+            } catch (e) {
+              console.error(e);
+              this.utilsSvc.presentToast({
+                message: 'Error al eliminar usuario',
+                color: 'danger',
+                duration: 2000
+              });
+            } finally {
+              loading.dismiss();
+            }
           }
         }
       ]
