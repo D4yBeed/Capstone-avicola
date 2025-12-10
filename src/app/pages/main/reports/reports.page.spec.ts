@@ -14,4 +14,8 @@ describe('ReportsPage', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> d02fea29ab703220deb709ea2154e9c42f60f426

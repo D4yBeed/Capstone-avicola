@@ -128,4 +128,8 @@ export class ReportsPage implements OnInit {
     return d.toISOString().slice(0, 10);
   }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d02fea29ab703220deb709ea2154e9c42f60f426
