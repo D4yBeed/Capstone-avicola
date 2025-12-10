@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Utils } from 'src/app/services/utils';
 import { Firebase } from 'src/app/services/firebase'; // Asegúrate de importar Firebase
 import { User } from 'src/app/models/user.model';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
