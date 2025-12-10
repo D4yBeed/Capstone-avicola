@@ -89,14 +89,22 @@ export class AdminUsersPage implements OnInit {
     await loading.present();
 
     try {
-      const { name, email, password, role, assignedShed } = this.form.value;
-      
-      await this.firebaseSvc.createUserWithRole(
-        { name, email, password },
-        role,
-        assignedShed
-      );
+    // En lugar de tomar el valor directo, creamos variables limpias
+    const formValue = this.form.value;
+    
+    // 1. Limpiamos el nombre de espacios accidentales al inicio/final
+    const name = formValue.name.trim(); 
+    
+    // 2. Extraemos el resto de datos normalmente
+    const { email, password, role, assignedShed } = formValue; 
 
+    // 3. Enviamos el 'name' limpio a la función
+    await this.firebaseSvc.createUserWithRole(
+      { name, email, password }, // Usamos la variable 'name' ya limpia
+      role,
+      assignedShed
+    );
+    
       this.utilsSvc.presentToast({
         message: `Usuario ${name} creado correctamente`,
         color: 'success',
