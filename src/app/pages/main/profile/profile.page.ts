@@ -22,7 +22,7 @@ export class ProfilePage implements OnInit {
     this.user = this.utilsSvc.getFromLocalStorage('user');
   }
 
-  // 🔹 Editar Nombre
+ // 🔹 Editar Nombre
   async editName() {
     const alert = await this.alertCtrl.create({
       header: 'Editar Nombre',
@@ -39,11 +39,17 @@ export class ProfilePage implements OnInit {
         {
           text: 'Guardar',
           handler: async (data) => {
-            if (data.name.trim().length < 3) {
+            //  1. Crea una variable limpia primero
+            const cleanName = data.name.trim();
+
+            //  2. Valida usando esa variable limpia
+            if (cleanName.length < 3) {
               this.utilsSvc.presentToast({ message: 'El nombre debe tener al menos 3 caracteres', color: 'warning' });
               return false;
             }
-            await this.updateNameLogic(data.name);
+
+            // 3. Envía la variable limpia a la función de actualizar
+            await this.updateNameLogic(cleanName); 
             return true;
           }
         }
