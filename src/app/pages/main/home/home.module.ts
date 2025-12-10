@@ -12,6 +12,7 @@ import { HomePage } from './home.page';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     IonicModule,
     HomePageRoutingModule,
     ReactiveFormsModule
