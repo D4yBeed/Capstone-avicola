@@ -132,3 +132,113 @@ ion-icon {
         --height: 680px;
     }
 }
+
+/* ================================
+   🌈 ESTILOS GLOBALES ARIZTÍA
+   ================================ */
+
+/* ======= Fuentes y color base ======= */
+:root {
+  --ion-color-primary: #e30613;
+  --ion-color-primary-rgb: 227, 6, 19;
+
+  --ion-color-secondary: #b9050e;
+  --ion-color-secondary-rgb: 185, 5, 14;
+
+  --ion-color-light: #f9f9f9;
+  --ion-color-dark: #1e1e1e;
+  --ion-text-color: #333;
+  --ion-font-family: 'Roboto', sans-serif;
+}
+
+/* ======= DARK MODE ======= */
+body.dark {
+  --ion-background-color: #1e1e1e;
+  --ion-text-color: #f5f5f5;
+  --ion-item-background: #2a2a2a;
+  --ion-color-light: #1e1e1e;
+  --ion-toolbar-background: #2a2a2a;
+  --ion-card-background: #2a2a2a;
+  --ion-color-step-850: #2a2a2a;
+  --ion-color-step-900: #1f1f1f;
+}
+
+/* ======= Toasts ======= */
+.custom-toast {
+  --border-radius: 12px;
+  --background: rgba(227, 6, 19, 0.95);
+  --color: #fff;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(227, 6, 19, 0.3);
+}
+
+/* ======= Alerts ======= */
+.custom-alert {
+  --background: #fff;
+  --border-radius: 16px;
+  --max-width: 350px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.custom-alert .alert-head {
+  font-weight: 700;
+  color: #e30613;
+  text-align: center;
+}
+
+.custom-alert .alert-message {
+  color: #333;
+  font-size: 15px;
+  text-align: center;
+}
+
+.custom-alert button {
+  font-weight: 600;
+  color: #e30613 !important;
+}
+
+/* Dark mode alert overrides */
+body.dark .custom-alert {
+  --background: #2a2a2a;
+  --color: #fff;
+}
+
+body.dark .custom-alert .alert-head {
+  color: #ff6262;
+}
+
+body.dark .custom-alert .alert-message {
+  color: #f2f2f2;
+}
+
+/* ======= Loadings ======= */
+.custom-loading {
+  --background: rgba(0, 0, 0, 0.7);
+  --spinner-color: #e30613;
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+/* ======= Botones globales ======= */
+ion-button {
+  font-weight: 600;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* ======= Tarjetas y listas ======= */
+ion-card {
+  border-radius: 16px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+ion-item {
+  --border-radius: 12px;
+}
+
+/* ======= Transiciones ======= */
+* {
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}

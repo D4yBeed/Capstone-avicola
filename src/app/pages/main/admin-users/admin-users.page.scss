@@ -1,14 +1,60 @@
+
+
+/* Botón Crear Usuario */
+.ion-margin-top {
+  margin-top: 25px;
+  --border-radius: 12px;
+  font-weight: 700;
+  height: 52px;
+  font-size: 16px;
+  --box-shadow: 0 4px 12px rgba(227, 6, 19, 0.3); /* Sombra roja */
+  
+  ion-icon {
+    margin-right: 8px;
+    color: #ffffff !important;
+  }
+
+  
+}
+
+
+
 ion-card {
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  background: #fff;
 }
 
-ion-item {
-  border-radius: 10px;
+/* Estilo para el contenedor deslizable */
+.user-sliding-item {
   margin-bottom: 10px;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden; /* Para que los bordes redondeados se mantengan al deslizar */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-ion-button {
-  margin: 4px;
+/* Estilo del item interno */
+.user-item {
+  --background: #fff;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+/* Iconos pequeños dentro del texto (maletín, casa) */
+ion-label p ion-icon {
+  font-size: 14px;
+  color: #666 !important; /* Color gris para estos iconos informativos */
+  margin-right: 4px;
+}
+
+/* CORRECCIÓN DEL BOTÓN ELIMINAR */
+.btn-delete {
+  --background: var(--ion-color-danger); /* Fondo Rojo */
+  
+  ion-icon {
+    color: #ffffff !important; /* 👈 Ícono Blanco forzado */
+    font-size: 24px;
+  }
 }

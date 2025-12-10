@@ -15,7 +15,8 @@ const routes: Routes = [
   {
     path: 'profile',
     loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
-  },  {
+  },
+  {
     path: 'history',
     loadChildren: () => import('./history/history.module').then( m => m.HistoryPageModule)
   },
@@ -28,8 +29,8 @@ const routes: Routes = [
     loadChildren: () => import('./admin-users/admin-users.module').then( m => m.AdminUsersPageModule)
   },
   {
-    path: 'reports',
-    loadChildren: () => import('./reports/reports.module').then( m => m.ReportsPageModule)
+    path: 'registro-huevos',
+    loadChildren: () => import('./registro-huevos/registro-huevos.module').then( m => m.RegistroHuevosPageModule)
   },
 
  

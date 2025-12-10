@@ -1,84 +1,140 @@
+/* Fondo general gris muy claro para resaltar la tarjeta blanca */
 .profile-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  --background: #fff;
+  --background: #f8f9fa;
+}
+
+/* Decoración sutil en el fondo */
+.top-header-decoration {
+  height: 120px;
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
 }
 
 .profile-wrapper {
-  width: 90%;
-  max-width: 380px;
-  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
 }
 
+/* Tarjeta Principal */
 .profile-card {
   background: #fff;
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  padding: 40px 25px 35px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
   text-align: center;
+  width: 100%;
+  max-width: 380px;
+  
+  /* Borde superior rojo característico */
+  border-top: 5px solid var(--ion-color-danger);
 }
 
-.avatar ion-icon {
-  font-size: 100px;
-  color: var(--ion-color-danger);
-  margin-bottom: 10px;
+/* Contenedor del Avatar */
+.avatar-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #fff;
+  /* Borde rojo para el avatar */
+  border: 3px solid var(--ion-color-danger);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 15px;
+  
+  ion-icon {
+    font-size: 60px;
+    /* El color se hereda del atributo color="danger" en el HTML */
+  }
 }
 
+/* Textos */
 h2 {
-  margin: 10px 0 4px;
+  margin: 5px 0;
   color: #222;
-  font-weight: bold;
+  font-weight: 800; /* Letra más gruesa */
+  font-size: 1.5rem;
 }
 
-p {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
+.email-text {
+  margin: 0 0 15px;
+  color: #888;
+  font-size: 0.95rem;
 }
 
-.role-label {
-  margin-top: 5px;
-  font-size: 14px;
-}
-
-.btn-history,
-.btn-report,
-.btn-users {
-  margin-top: 15px;
-  --border-radius: 10px;
-  font-weight: 600;
-}
-
-.btn-history {
-  --border-color: var(--ion-color-danger);
+/* Badge del Rol (Pastilla rosa/roja) */
+.role-badge {
+  display: inline-block;
+  background-color: rgba(227, 6, 19, 0.1); /* Rojo muy suave */
   color: var(--ion-color-danger);
+  padding: 6px 20px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
 }
 
-.btn-history ion-icon {
-  color: var(--ion-color-danger);
+/* Información del Galpón */
+.shed-info {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 10px;
+
+  ion-icon {
+    font-size: 1.2rem;
+  }
 }
 
-.btn-report,
-.btn-users {
-  --background: var(--ion-color-danger);
-  color: white;
+.divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 20px 0;
 }
 
-.btn-report ion-icon,
-.btn-users ion-icon {
-  color: white;
-}
-
-.btn-logout {
-  margin-top: 35px;
-  --background: var(--ion-color-danger);
-  --color: #fff;
+/* Botones de Acción (Editar/Cambiar Pass) */
+.action-btn {
+  --border-color: #ddd;
   --border-radius: 12px;
+  --color: #444;
+  --background-hover: #f9f9f9;
   font-weight: 600;
+  margin-bottom: 12px;
+  height: 50px;
+  font-size: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+
+  ion-icon {
+    color: var(--ion-color-danger); /* Iconos en rojo */
+    margin-right: 10px;
+  }
 }
 
-.btn-logout ion-icon {
-  color: #fff;
+/* Botón Cerrar Sesión */
+.btn-logout {
+  margin-top: 25px;
+  --border-radius: 12px;
+  font-weight: 700;
+  height: 52px;
+  font-size: 16px;
+  --box-shadow: 0 4px 12px rgba(227, 6, 19, 0.3); /* Sombra roja */
+  
+  ion-icon {
+    margin-right: 8px;
+    color: #ffffff !important;
+  }
 }

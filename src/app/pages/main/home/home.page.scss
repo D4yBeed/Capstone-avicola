@@ -1,184 +1,105 @@
 .home-content {
-  --background: #fafafa;
-  padding: 12px;
+  --background: #ffffff;
 }
 
-.date-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffeaea;
-  color: #c62828;
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin: 10px auto;
-  width: fit-content;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.date-icon {
-  margin-right: 6px;
-  font-size: 18px;
-}
-
-/* 🔒 Banner modo solo lectura */
-.readonly-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff3e0;
-  color: #e65100;
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin: 8px 4px 12px;
-  font-size: 0.9rem;
-  border: 1px solid #ffe0b2;
-
-  ion-icon {
-    font-size: 18px;
-  }
-}
-
-.selectors-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 14px;
-
-  ion-item {
-    --background: transparent;
-    --highlight-color-focused: #e53935;
-  }
-}
-
-.count-card {
-  border-radius: 18px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.count-title {
-  color: #d32f2f;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  margin-top: 6px;
-}
-
-.count-grid {
+.menu-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.count-row {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: #fff;
-  padding: 8px 14px;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 30px 20px;
 }
 
-.label {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #333;
-}
+.welcome-section {
+  text-align: center;
+  margin-bottom: 30px;
 
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  .btn-minus,
-  .btn-plus {
-    --border-radius: 8px;
-    min-width: 34px;
-    min-height: 30px;
-    font-size: 1.1rem;
+  h5 {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
   }
 
-  .btn-minus {
-    --background: #f5f5f5;
-    color: #c62828;
+  h2 {
+    margin: 5px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #222;
   }
 
-  .btn-plus {
-    --background: #c62828;
-    color: white;
-  }
-
-  .count {
-    min-width: 28px;
-    text-align: center;
-    font-weight: 600;
-  }
-}
-
-/* 💡 Estado deshabilitado visualmente más claro */
-.btn-minus[disabled],
-.btn-plus[disabled] {
-  opacity: 0.5;
-}
-
-/* También puedes marcar el botón guardar cuando está deshabilitado */
-.btn-save[disabled] {
-  opacity: 0.6;
-}
-
-.notes {
-  margin-top: 16px;
-
-  ion-textarea {
+  .role-badge {
+    display: inline-block;
+    background: #ffeaea;
+    color: var(--ion-color-danger);
+    padding: 4px 12px;
     border-radius: 12px;
-    background: #f9f9f9;
-    padding: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 5px;
   }
 }
 
-.total-box {
-  text-align: center;
-  margin: 14px 0;
+.menu-title {
+  font-size: 18px;
   font-weight: 600;
-  color: #c62828;
-  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 30px;
 }
 
-.btn-save {
-  --background: #c62828;
-  color: white;
-  --border-radius: 10px;
-  margin-top: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+/* Grilla adaptable */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+  gap: 30px;
+  width: 100%;
+  max-width: 350px;
+  justify-items: center;
 }
 
-/* 🔢 Input manual para ingresar el número */
-.manual-input {
-  width: 60px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 4px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  background: #ffffff;
-  color: #333;
+/* Estilo de cada botón */
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  label {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+  }
 }
 
-/* Cuando el formulario está en modo solo lectura */
-.manual-input:disabled {
-  background: #f0f0f0;
-  color: #999;
-  border-color: #ccc;
-}
+/* Círculos */
+.circle-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 1px solid #f0f0f0;
 
-/* Para evitar que parezca editable algo negativo (control real está en TS) */
-.manual-input.invalid-negative {
-  border-color: #d32f2f;
-  color: #d32f2f;
+  /* Iconos de Ionic */
+  ion-icon {
+    font-size: 42px;
+  }
+
+  /* Imágenes */
+  &.image-icon {
+    padding: 18px; /* Espacio interno para que la imagen no toque bordes */
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
 }
